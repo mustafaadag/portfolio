@@ -6,7 +6,7 @@ export async function POST(request: Request) {
   try {
     const body = await request.json().catch(() => ({}));
 
-    // 1. İstemciden gelen gerçek IP, yoksa sunucu başlıkları, o da yoksa localhost
+    // İstemciden gönderilen ip varsa öncelikli al
     const forwardedFor = request.headers.get("x-forwarded-for");
     const realIp = request.headers.get("x-real-ip");
     const headerIp = forwardedFor ? forwardedFor.split(",")[0].trim() : realIp;
