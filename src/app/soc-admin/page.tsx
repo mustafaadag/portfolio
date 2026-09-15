@@ -14,6 +14,7 @@ import {
   ArrowLeft,
   Clock,
   Timer,
+  AlertCircle,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -34,6 +35,7 @@ export default function SocAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [pinInput, setPinInput] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const [logs, setLogs] = useState<VisitorLog[]>([]);
   const [loading, setLoading] = useState(false);
@@ -41,6 +43,7 @@ export default function SocAdminPage() {
 
   const fetchLogs = async () => {
     setLoading(true);
+    setApiError(null);
     setErrorMsg("");
     try {
       const querySnapshot = await getDocs(collection(db, "visitor_logs"));
@@ -63,7 +66,7 @@ export default function SocAdminPage() {
       setLogs(fetched);
     } catch (err: any) {
       console.error("Log fetch hatası:", err);
-      setErrorMsg(`Veri çekme hatası: ${err.message || err}`);
+      setApiError(`Veri çekme hatası: ${err.message || err}`);
     } finally {
       setLoading(false);
     }
@@ -219,6 +222,14 @@ export default function SocAdminPage() {
           </div>
         </div>
 
+        {/* HATA BİLDİRİMİ VARSA GÖSTER */}
+        {apiError && (
+          <div className="p-4 rounded-2xl border border-red-500/40 bg-red-950/30 text-red-300 font-mono text-xs flex items-center gap-2.5">
+            <AlertCircle className="size-4 shrink-0 text-red-400" />
+            <span>{apiError}</span>
+          </div>
+        )}
+
         {/* METRİK KARTLARI */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-5 rounded-2xl border border-white/10 bg-[#080b0f]">
@@ -312,7 +323,9 @@ export default function SocAdminPage() {
                 {filteredLogs.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="py-8 text-center text-zinc-500">
-                      Hiçbir kayıt bulunamadı.
+                      {loading
+                        ? "Veriler çekiliyor..."
+                        : "Hiçbir kayıt bulunamadı."}
                     </td>
                   </tr>
                 ) : (
