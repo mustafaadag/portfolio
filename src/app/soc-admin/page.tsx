@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { db } from "@/firebase";
-import { collection, getDocs } from "firebase/firestore";
 import {
   ShieldAlert,
   Globe2,
@@ -26,6 +24,7 @@ interface VisitorLog {
   location?: string;
   userAgent?: string;
   durationSeconds?: number;
+  timeSec?: number;
   timestamp?: any;
 }
 
@@ -46,27 +45,17 @@ export default function SocAdminPage() {
     setApiError(null);
     setErrorMsg("");
     try {
-      const querySnapshot = await getDocs(collection(db, "visitor_logs"));
-      const fetched: VisitorLog[] = [];
+      const res = await fetch("/api/log-visit", { cache: "no-store" });
+      const data = await res.json();
 
-      querySnapshot.forEach((doc) => {
-        fetched.push({ id: doc.id, ...doc.data() } as VisitorLog);
-      });
-
-      fetched.sort((a, b) => {
-        const timeA =
-          a.timestamp?.seconds ||
-          (a.timestamp?.toDate ? a.timestamp.toDate().getTime() / 1000 : 0);
-        const timeB =
-          b.timestamp?.seconds ||
-          (b.timestamp?.toDate ? b.timestamp.toDate().getTime() / 1000 : 0);
-        return timeB - timeA;
-      });
-
-      setLogs(fetched);
+      if (data.success && Array.isArray(data.logs)) {
+        setLogs(data.logs);
+      } else {
+        setApiError(data.error || "Loglar yüklenemedi.");
+      }
     } catch (err: any) {
       console.error("Log fetch hatası:", err);
-      setApiError(`Veri çekme hatası: ${err.message || err}`);
+      setApiError(`Sunucu Bağlantı Hatası: ${err.message || err}`);
     } finally {
       setLoading(false);
     }
@@ -110,13 +99,25 @@ export default function SocAdminPage() {
     return Math.round(total / logs.length);
   }, [logs]);
 
-  // Net süre gösterici: Kesin dakika ve saniye
   const formatDuration = (seconds?: number) => {
     const s = Math.max(0, Math.floor(seconds || 0));
     if (s < 60) return `${s} sn`;
     const mins = Math.floor(s / 60);
     const remSecs = s % 60;
     return remSecs > 0 ? `${mins} dk ${remSecs} sn` : `${mins} dk`;
+  };
+
+  const formatTimestamp = (log: VisitorLog) => {
+    if (log.timeSec) {
+      return new Date(log.timeSec * 1000).toLocaleString("tr-TR");
+    }
+    if (log.timestamp?.seconds) {
+      return new Date(log.timestamp.seconds * 1000).toLocaleString("tr-TR");
+    }
+    if (log.timestamp?.toDate) {
+      return log.timestamp.toDate().toLocaleString("tr-TR");
+    }
+    return "Şimdi";
   };
 
   if (!isAuthenticated) {
@@ -222,7 +223,6 @@ export default function SocAdminPage() {
           </div>
         </div>
 
-        {/* HATA BİLDİRİMİ VARSA GÖSTER */}
         {apiError && (
           <div className="p-4 rounded-2xl border border-red-500/40 bg-red-950/30 text-red-300 font-mono text-xs flex items-center gap-2.5">
             <AlertCircle className="size-4 shrink-0 text-red-400" />
@@ -281,7 +281,7 @@ export default function SocAdminPage() {
               DİNLENİYOR
             </div>
             <p className="mt-1 text-[10px] font-mono text-zinc-500">
-              Beacon & Heartbeat aktif
+              API Gateway aktif
             </p>
           </div>
         </div>
@@ -329,51 +329,38 @@ export default function SocAdminPage() {
                     </td>
                   </tr>
                 ) : (
-                  filteredLogs.map((log) => {
-                    let formattedDate = "N/A";
-                    if (log.timestamp?.toDate) {
-                      formattedDate = log.timestamp
-                        .toDate()
-                        .toLocaleString("tr-TR");
-                    } else if (log.timestamp?.seconds) {
-                      formattedDate = new Date(
-                        log.timestamp.seconds * 1000,
-                      ).toLocaleString("tr-TR");
-                    }
-
-                    return (
-                      <tr
-                        key={log.id}
-                        className="hover:bg-white/[0.02] transition"
+                  filteredLogs.map((log) => (
+                    <tr
+                      key={log.id}
+                      className="hover:bg-white/[0.02] transition"
+                    >
+                      <td className="py-3 px-4 text-zinc-400 whitespace-nowrap text-[11px]">
+                        {formatTimestamp(log)}
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg border border-amber-400/20 bg-amber-400/10 text-amber-300 font-bold text-[11px]">
+                          <Clock className="size-3 text-amber-400" />
+                          {formatDuration(log.durationSeconds)}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <span className="px-2 py-0.5 rounded border border-emerald-500/20 bg-emerald-500/10 text-emerald-300 font-bold">
+                          {log.ip}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-zinc-300 whitespace-nowrap">
+                        {log.city
+                          ? `${log.city}, ${log.country}`
+                          : log.location || "Bilinmiyor"}
+                      </td>
+                      <td
+                        className="py-3 px-4 text-zinc-500 text-[10px] max-w-xs truncate"
+                        title={log.userAgent}
                       >
-                        <td className="py-3 px-4 text-zinc-400 whitespace-nowrap text-[11px]">
-                          {formattedDate}
-                        </td>
-                        <td className="py-3 px-4 whitespace-nowrap">
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg border border-amber-400/20 bg-amber-400/10 text-amber-300 font-bold text-[11px]">
-                            <Clock className="size-3 text-amber-400" />
-                            {formatDuration(log.durationSeconds)}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 whitespace-nowrap">
-                          <span className="px-2 py-0.5 rounded border border-emerald-500/20 bg-emerald-500/10 text-emerald-300 font-bold">
-                            {log.ip}
-                          </span>
-                        </td>
-                        <td className="py-3 px-4 text-zinc-300 whitespace-nowrap">
-                          {log.city
-                            ? `${log.city}, ${log.country}`
-                            : log.location || "Bilinmiyor"}
-                        </td>
-                        <td
-                          className="py-3 px-4 text-zinc-500 text-[10px] max-w-xs truncate"
-                          title={log.userAgent}
-                        >
-                          {log.userAgent || "Belirtilmemiş"}
-                        </td>
-                      </tr>
-                    );
-                  })
+                        {log.userAgent || "Belirtilmemiş"}
+                      </td>
+                    </tr>
+                  ))
                 )}
               </tbody>
             </table>
