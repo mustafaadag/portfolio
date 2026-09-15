@@ -1,33 +1,30 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
-import { SpiralAnimation } from "./components/ui/spiral-animation";
+import { useState } from "react";
 import {
-  ShieldCheck,
-  Terminal as TerminalIcon,
+  Shield,
+  Terminal,
   Cpu,
   Briefcase,
   GraduationCap,
   Languages,
   LineChart,
-  Box,
-  CheckCircle2,
-  Sparkles,
+  ExternalLink,
+  ArrowUpRight,
   Mail,
-  ChevronDown,
-  Play,
-  Database,
-  Search,
+  Layers,
   Activity,
   Send,
+  Sparkles,
+  CheckCircle2,
 } from "lucide-react";
 
 function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       viewBox="0 0 24 24"
-      width="16"
-      height="16"
+      width="18"
+      height="18"
       stroke="currentColor"
       strokeWidth="2"
       fill="none"
@@ -45,8 +42,8 @@ function LinkedinIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       viewBox="0 0 24 24"
-      width="16"
-      height="16"
+      width="18"
+      height="18"
       stroke="currentColor"
       strokeWidth="2"
       fill="none"
@@ -64,1095 +61,607 @@ function LinkedinIcon(props: React.SVGProps<SVGSVGElement>) {
 export default function Home() {
   const [lang, setLang] = useState<"tr" | "en">("tr");
 
-  const [terminalLogs, setTerminalLogs] = useState<string[]>([
-    "DagSec EDR Agent Engine v2.4 initialized.",
-    "Type 'help' to list operational commands or click 'Simulate Attack'.",
-  ]);
-  const [terminalInput, setTerminalInput] = useState("");
-  const [isSimulating, setIsSimulating] = useState(false);
-  const terminalContainerRef = useRef<HTMLDivElement>(null);
-
   const toggleLanguage = () => {
     setLang((prev) => (prev === "tr" ? "en" : "tr"));
   };
 
-  const scrollToContent = () => {
-    document.getElementById("about")?.scrollIntoView({ behavior: "smooth" });
+  const content = {
+    tr: {
+      badge: "Siber Güvenlik & Sistem Mühendisliği",
+      heroTitle: "Mustafa Dağ",
+      heroRole: "Endpoint Security Engineer & Software Developer",
+      heroDesc:
+        "Uç nokta tespiti (EDR), Windows Internals, Sysmon telemetri modelleme ve C# tabanlı yüksek performanslı siber savunma sistemleri geliştiriyorum.",
+      stats: [
+        { value: "EDR & SOC", label: "Uzmanlık Alanı" },
+        { value: "C# / .NET", label: "Çekirdek Dil" },
+        { value: "Bursa / Nilüfer", label: "Lokasyon" },
+      ],
+      ctaContact: "İletişime Geç",
+      ctaProjects: "Projeleri İncele",
+      aboutTitle: "Hakkımda",
+      aboutSubtitle: "Mühendislik Vizyonu",
+      aboutText:
+        "Karabük Üniversitesi Bilgisayar Mühendisliği mezunuyum. Siber güvenlik odağında; Windows iç mimarisi (Windows Internals), Sysmon telemetrisi üzerinden şüpheli süreçlerin yakalanması, PE başlıkları üzerinde Shannon entropi analizi ve otonom tehdit müdahale mekanizmaları tasarlıyorum. Yazılım geliştirme pratiğimi modern uç nokta güvenliği ve telemetri boru hatlarıyla harmanlıyorum.",
+      projectsTitle: "Öne Çıkan Çalışmalar",
+      projectsSubtitle: "Bento Portfolyo",
+      experienceTitle: "Kariyer & Eğitim",
+      experienceSubtitle: "Zaman Çizelgesi",
+      skillsTitle: "Yetkinlik Matrisi",
+      skillsSubtitle: "Kullandığım Teknolojiler",
+      contactTitle: "Bir Fikrin mi Var?",
+      contactSubtitle: "Doğrudan İletişim",
+      contactDesc:
+        "Siber güvenlik mimarileri, sistem mühendisliği veya yazılım iş birlikleri için bana doğrudan ulaşabilirsiniz.",
+    },
+    en: {
+      badge: "Cybersecurity & Systems Engineering",
+      heroTitle: "Mustafa Dağ",
+      heroRole: "Endpoint Security Engineer & Software Developer",
+      heroDesc:
+        "Architecting Endpoint Detection & Response (EDR) agents, Windows Internals telemetry pipelines, and resilient C# cyber defense engines.",
+      stats: [
+        { value: "EDR & SOC", label: "Core Specialty" },
+        { value: "C# / .NET", label: "Primary Stack" },
+        { value: "Bursa / TR", label: "Location" },
+      ],
+      ctaContact: "Get in Touch",
+      ctaProjects: "Explore Works",
+      aboutTitle: "About Me",
+      aboutSubtitle: "Engineering Vision",
+      aboutText:
+        "Computer Engineering graduate from Karabük University. Specialized in Windows Internals, real-time Sysmon event auditing, Shannon entropy calculations across PE binaries, and automated threat mitigation pipelines. Merging disciplined systems development with proactive defensive telemetry.",
+      projectsTitle: "Selected Works",
+      projectsSubtitle: "Bento Showcase",
+      experienceTitle: "Career & Credentials",
+      experienceSubtitle: "Timeline",
+      skillsTitle: "Core Proficiencies",
+      skillsSubtitle: "Tech Stack",
+      contactTitle: "Have a Project in Mind?",
+      contactSubtitle: "Direct Channel",
+      contactDesc:
+        "Available for cybersecurity architectures, systems programming, and high-performance software collaborations.",
+    },
   };
 
-  useEffect(() => {
-    if (terminalContainerRef.current) {
-      terminalContainerRef.current.scrollTop =
-        terminalContainerRef.current.scrollHeight;
-    }
-  }, [terminalLogs]);
-
-  const runSimulation = () => {
-    if (isSimulating) return;
-    setIsSimulating(true);
-    const simulationSteps = [
-      "[*] [EVENT] New process creation intercepted: powershell.exe (PID: 4912)",
-      "[*] [TELEMETRY] Querying Sysmon Event ID 1 (Parent: explorer.exe)...",
-      "[*] [STATIC ANALYZER] Calculating Shannon Entropy: 7.84 (Status: High/Suspicious Packing)",
-      "[*] [INTELLIGENCE] Verifying SHA-256 with VirusTotal API & Local SQLite Cache...",
-      "[*] [VERDICT] Zero-day payload signature match: 42/70 engines flagged.",
-      "[!] [SOC ACTION] EDR Agent terminated process 4912. Quarantine log generated successfully.",
-    ];
-
-    simulationSteps.forEach((step, idx) => {
-      setTimeout(
-        () => {
-          setTerminalLogs((prev) => [...prev, step]);
-          if (idx === simulationSteps.length - 1) setIsSimulating(false);
-        },
-        (idx + 1) * 700,
-      );
-    });
-  };
-
-  const handleTerminalSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const cmd = terminalInput.trim().toLowerCase();
-    if (!cmd) return;
-
-    let response = "";
-    if (cmd === "help") {
-      response =
-        "Commands: 'help', 'scan', 'skills', 'projects', 'status', 'clear'";
-    } else if (cmd === "scan") {
-      runSimulation();
-      setTerminalInput("");
-      return;
-    } else if (cmd === "skills") {
-      response =
-        "Primary: C#, .NET, Sysmon Telemetry, Windows Internals, Threat Hunting, Python, Flutter";
-    } else if (cmd === "projects") {
-      response =
-        "1. Hybrid EDR System (TÜBİTAK 2209-A) | 2. IoT Energy Dashboard | 3. ML Rent Predictor";
-    } else if (cmd === "status") {
-      response =
-        "EDR Service: ONLINE | SOC Gateway: ACTIVE | Host Telemetry: SECURE";
-    } else if (cmd === "clear") {
-      setTerminalLogs([]);
-      setTerminalInput("");
-      return;
-    } else {
-      response = `Command not recognized: '${cmd}'. Type 'help' for available commands.`;
-    }
-
-    setTerminalLogs((prev) => [...prev, `> ${terminalInput}`, response]);
-    setTerminalInput("");
-  };
+  const t = content[lang];
 
   return (
-    <main className="relative bg-black text-neutral-200 min-h-screen selection:bg-neutral-800 font-sans antialiased overflow-x-hidden">
-      <SpiralAnimation />
+    <div className="min-h-screen bg-[#09090b] text-neutral-100 font-sans selection:bg-neutral-800 selection:text-white antialiased relative">
+      {/* İnce Minimalist Izgara Arka Planı (Subtle Ambient Glow) */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-emerald-500/10 blur-[140px] rounded-full pointer-events-none" />
 
-      <header className="fixed top-0 left-0 right-0 z-50 flex justify-end p-6 max-w-6xl mx-auto pointer-events-none">
-        <button
-          onClick={toggleLanguage}
-          className="pointer-events-auto flex items-center gap-2 px-4 py-1.5 rounded-full border border-neutral-800 bg-neutral-950/80 backdrop-blur-md hover:border-neutral-500 hover:text-white transition-all text-xs font-mono shadow-2xl cursor-pointer"
-          title="Change Language"
+      {/* NAVİGASYON */}
+      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center justify-between w-[92%] max-w-5xl px-6 py-3.5 rounded-full border border-neutral-800/80 bg-neutral-950/70 backdrop-blur-xl shadow-2xl">
+        <a
+          href="#"
+          className="text-sm font-semibold tracking-tight text-white flex items-center gap-2"
         >
-          <Languages className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="font-semibold tracking-wider">
-            {lang === "tr" ? "EN" : "TR"}
-          </span>
-        </button>
-      </header>
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+          Mustafa Dağ
+        </a>
 
-      {/* 1. SAYFA (HERO) */}
-      <section className="relative z-10 w-full h-screen overflow-hidden flex items-center justify-center">
-        <div className="text-center px-4 max-w-4xl mx-auto">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-neutral-800/80 bg-neutral-950/60 mb-8 text-xs font-mono text-emerald-400 backdrop-blur-md">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping" />
-            {lang === "tr"
-              ? "Portfolyo & Siber Güvenlik Laboratuvarı"
-              : "Portfolio & Security Lab"}
+        <div className="flex items-center gap-6">
+          <a
+            href="#projects"
+            className="text-xs text-neutral-400 hover:text-white transition hidden sm:inline-block"
+          >
+            {lang === "tr" ? "Projeler" : "Projects"}
+          </a>
+          <a
+            href="#about"
+            className="text-xs text-neutral-400 hover:text-white transition hidden sm:inline-block"
+          >
+            {lang === "tr" ? "Hakkımda" : "About"}
+          </a>
+          <a
+            href="#contact"
+            className="text-xs text-neutral-400 hover:text-white transition hidden sm:inline-block"
+          >
+            {lang === "tr" ? "İletişim" : "Contact"}
+          </a>
+
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-neutral-700/80 bg-neutral-900 text-xs font-mono text-neutral-300 hover:text-white transition cursor-pointer"
+          >
+            <Languages className="w-3.5 h-3.5 text-emerald-400" />
+            <span className="font-semibold">{lang === "tr" ? "EN" : "TR"}</span>
+          </button>
+        </div>
+      </nav>
+
+      <main className="relative z-10 max-w-5xl mx-auto px-6 pt-36 sm:pt-44 pb-32 space-y-36">
+        {/* HERO SECTION - MODERN & BOLD */}
+        <section className="space-y-10">
+          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-neutral-800 bg-neutral-900/60 text-xs font-mono text-neutral-300 backdrop-blur-md">
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+            {t.badge}
           </div>
 
-          <h1 className="text-white text-2xl sm:text-4xl md:text-5xl lg:text-6xl tracking-[0.2em] uppercase font-extralight transition-all duration-700 hover:tracking-[0.3em] select-none">
-            Mustafa Dağ
-          </h1>
+          <div className="space-y-4">
+            <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight text-white leading-none">
+              {t.heroTitle}
+            </h1>
+            <p className="text-xl sm:text-2xl md:text-3xl text-neutral-400 font-light max-w-3xl leading-snug">
+              {t.heroRole}
+            </p>
+          </div>
 
-          <p className="mt-6 text-neutral-300 text-xs sm:text-sm md:text-base font-mono tracking-wider max-w-2xl mx-auto leading-relaxed border-y border-neutral-800/60 py-3 backdrop-blur-xs">
-            Cybersecurity Specialist | Threat Detection & EDR Systems | C# &
-            Sysmon | SOC Analyst
+          <p className="text-neutral-400 text-base sm:text-lg max-w-2xl leading-relaxed font-light">
+            {t.heroDesc}
           </p>
 
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="flex flex-wrap items-center gap-4 pt-2">
             <a
-              href="https://github.com/mustafaadag"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-800 bg-neutral-950/80 backdrop-blur-md hover:border-neutral-500 hover:bg-neutral-900 transition-all text-xs tracking-wider"
+              href="#contact"
+              className="flex items-center gap-2 px-7 py-3.5 rounded-full bg-white text-black font-semibold text-sm hover:bg-neutral-200 transition shadow-lg shadow-white/5"
             >
-              <GithubIcon className="text-white" />
-              <span>GitHub</span>
+              <span>{t.ctaContact}</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </a>
+
+            <a
+              href="#projects"
+              className="flex items-center gap-2 px-7 py-3.5 rounded-full border border-neutral-800 bg-neutral-950/60 text-neutral-300 hover:text-white hover:border-neutral-600 transition text-sm backdrop-blur-md"
+            >
+              <span>{t.ctaProjects}</span>
+            </a>
+
+            <div className="flex items-center gap-2 sm:ml-4 border-l border-neutral-800 pl-4">
+              <a
+                href="https://github.com/mustafaadag"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-3 rounded-full border border-neutral-800 bg-neutral-900/60 text-neutral-400 hover:text-white hover:border-neutral-600 transition"
+                title="GitHub"
+              >
+                <GithubIcon />
+              </a>
+              <a
+                href="https://www.linkedin.com/in/mustafa-da%C4%9F-63609524a/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-3 rounded-full border border-neutral-800 bg-neutral-900/60 text-neutral-400 hover:text-white hover:border-neutral-600 transition"
+                title="LinkedIn"
+              >
+                <LinkedinIcon />
+              </a>
+            </div>
+          </div>
+
+          {/* İstatistik Göstergesi */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-12 border-t border-neutral-800/80">
+            {t.stats.map((stat, idx) => (
+              <div key={idx} className="space-y-1">
+                <div className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                  {stat.value}
+                </div>
+                <div className="text-xs font-mono text-neutral-500 uppercase tracking-wider">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* HAKKIMDA (ÖZET PROFİL) */}
+        <section
+          id="about"
+          className="p-8 sm:p-12 rounded-3xl border border-neutral-800/80 bg-neutral-900/30 backdrop-blur-xl relative overflow-hidden group"
+        >
+          <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/10 transition-all duration-700" />
+          <div className="relative z-10 space-y-4">
+            <span className="text-xs font-mono uppercase tracking-widest text-emerald-400">
+              {t.aboutSubtitle}
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+              {t.aboutTitle}
+            </h2>
+            <p className="text-neutral-300 text-base sm:text-lg leading-relaxed font-light pt-2 max-w-4xl">
+              {t.aboutText}
+            </p>
+          </div>
+        </section>
+
+        {/* BENTO GRID PROJE VİTRİNİ */}
+        <section id="projects" className="space-y-8">
+          <div className="space-y-2">
+            <span className="text-xs font-mono uppercase tracking-widest text-emerald-400">
+              {t.projectsSubtitle}
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+              {t.projectsTitle}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* BENTO 1: HİBRİT EDR SİSTEMİ (GENİŞ KART) */}
+            <div className="md:col-span-2 p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-xl hover:border-neutral-700 transition duration-300 flex flex-col justify-between space-y-6 group">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono text-emerald-400 px-3 py-1 rounded-full border border-emerald-900/50 bg-emerald-950/40">
+                    Endpoint Security & Agent
+                  </span>
+                  <Shield className="w-6 h-6 text-neutral-500 group-hover:text-emerald-400 transition" />
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                  {lang === "tr"
+                    ? "Hibrit EDR & Sezgisel Tehdit Algılama Sistemi"
+                    : "Hybrid EDR & Heuristic Threat Detection"}
+                </h3>
+                <p className="text-neutral-400 text-sm sm:text-base leading-relaxed">
+                  {lang === "tr"
+                    ? "Sysmon Event Log telemetrisini gerçek zamanlı dinleyen, PE dosyalarında Shannon Entropi formülüyle paketlenmiş/gizlenmiş kod arayan ve yerel SQLite önbellekli VirusTotal API doğrulaması yapan otonom C# uç nokta güvenlik ajanı."
+                    : "A C# endpoint security agent hooking Sysmon telemetry in real-time, executing Shannon entropy heuristics on PE sections to spot packed payloads, backed by local SQLite caching and VirusTotal API."}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-neutral-800/60 text-xs text-neutral-300">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>
+                    {lang === "tr"
+                      ? "Sysmon Event ID 1, 3, 7 Telemetrisi"
+                      : "Sysmon Event ID 1, 3, 7 Telemetry"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>
+                    {lang === "tr"
+                      ? "Shannon Entropi Sezgisel Analizi"
+                      : "Shannon Entropy Heuristic Engine"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>
+                    {lang === "tr"
+                      ? "SQLite Önbellekleme & VT API"
+                      : "SQLite Local Caching & VT API"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>
+                    {lang === "tr"
+                      ? "Otonom Süreç Karantinası"
+                      : "Automated Process Remediation"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-2">
+                {[
+                  "C#",
+                  ".NET",
+                  "Sysmon",
+                  "Windows Internals",
+                  "SQLite",
+                  "VirusTotal API",
+                ].map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-xs font-mono text-neutral-400 bg-neutral-950 px-3 py-1 rounded-md border border-neutral-800"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* BENTO 2: TELEMETRİ BORU HATTI METRİĞİ */}
+            <div className="p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-xl hover:border-neutral-700 transition duration-300 flex flex-col justify-between space-y-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono text-sky-400 px-3 py-1 rounded-full border border-sky-900/50 bg-sky-950/40">
+                    Pipeline
+                  </span>
+                  <Activity className="w-6 h-6 text-neutral-500" />
+                </div>
+                <h3 className="text-xl font-bold text-white tracking-tight">
+                  {lang === "tr"
+                    ? "Telemetri Boru Hattı"
+                    : "Telemetry Pipeline"}
+                </h3>
+                <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed">
+                  {lang === "tr"
+                    ? "Ham işletim sistemi loglarından başlayıp SOC aksiyonuna uzanan 4 adımlı otonom filtreleme mimarisi."
+                    : "4-stage automated pipeline filtering kernel telemetry to targeted SOC responses."}
+                </p>
+              </div>
+
+              <div className="space-y-3 text-xs font-mono">
+                <div className="p-2.5 rounded-xl bg-neutral-950/80 border border-neutral-800 text-neutral-300">
+                  01. Sysmon Ingestion
+                </div>
+                <div className="p-2.5 rounded-xl bg-neutral-950/80 border border-neutral-800 text-neutral-300">
+                  02. Heuristic Entropy Scan
+                </div>
+                <div className="p-2.5 rounded-xl bg-neutral-950/80 border border-neutral-800 text-neutral-300">
+                  03. Cloud Threat Query
+                </div>
+                <div className="p-2.5 rounded-xl bg-neutral-950/80 border border-neutral-800 text-emerald-400">
+                  04. Quarantine / Terminate
+                </div>
+              </div>
+            </div>
+
+            {/* BENTO 3: IOT ENERJİ İZLEME PANELİ */}
+            <div className="p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-xl hover:border-neutral-700 transition duration-300 flex flex-col justify-between space-y-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono text-amber-400 px-3 py-1 rounded-full border border-amber-900/50 bg-amber-950/40">
+                    IoT & Mobile
+                  </span>
+                  <Cpu className="w-6 h-6 text-neutral-500" />
+                </div>
+                <h3 className="text-xl font-bold text-white tracking-tight">
+                  {lang === "tr"
+                    ? "Canlı Enerji İzleme Paneli"
+                    : "Realtime Energy Dashboard"}
+                </h3>
+                <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed">
+                  {lang === "tr"
+                    ? "ESP32 sensör telemetrisini Firebase Realtime DB üzerinden toplayıp Flutter mobil istemcisinde canlı görselleştiren sistem."
+                    : "Live telemetry ingestion from ESP32 microcontrollers streaming to Firebase Realtime DB and visualised via Flutter."}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-4 border-t border-neutral-800/60">
+                {["Flutter", "Dart", "ESP32", "Firebase"].map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-xs font-mono text-neutral-400 bg-neutral-950 px-2.5 py-1 rounded-md border border-neutral-800"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* BENTO 4: PYTHON KONUT FİYAT TAHMİN MODELİ (GENİŞ KART) */}
+            <div className="md:col-span-2 p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-xl hover:border-neutral-700 transition duration-300 flex flex-col justify-between space-y-6">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono text-purple-400 px-3 py-1 rounded-full border border-purple-900/50 bg-purple-950/40">
+                    Machine Learning
+                  </span>
+                  <LineChart className="w-6 h-6 text-neutral-500" />
+                </div>
+                <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                  {lang === "tr"
+                    ? "Konut Kira Fiyatı Tahmin & Regresyon Modeli"
+                    : "Real Estate Rent Price Estimation Model"}
+                </h3>
+                <p className="text-neutral-400 text-sm sm:text-base leading-relaxed">
+                  {lang === "tr"
+                    ? "Açık kaynaklı konut veri setleri üzerinde aykırı değer filtreleme, özellik mühendisliği (feature scaling) ve istatistiksel regresyon modelleri uygulayarak piyasa manipülasyonlarını tespit eden analitik sistem."
+                    : "Heuristic regression pipeline executing outlier elimination, feature scaling, and correlation metrics on real estate datasets to detect market price anomalies."}
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2 pt-4 border-t border-neutral-800/60">
+                {[
+                  "Python",
+                  "Pandas",
+                  "Scikit-Learn",
+                  "Feature Engineering",
+                  "Jupyter",
+                ].map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-xs font-mono text-neutral-400 bg-neutral-950 px-3 py-1 rounded-md border border-neutral-800"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* DENEYİM & EĞİTİM ZAMAN ÇİZELGESİ */}
+        <section className="space-y-8">
+          <div className="space-y-2">
+            <span className="text-xs font-mono uppercase tracking-widest text-emerald-400">
+              {t.experienceSubtitle}
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+              {t.experienceTitle}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* KARİYER */}
+            <div className="p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-900/30 backdrop-blur-xl space-y-6">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <Briefcase className="w-5 h-5 text-emerald-400" />
+                {lang === "tr" ? "İş Deneyimi" : "Work Experience"}
+              </h3>
+
+              <div className="space-y-8 border-l border-neutral-800 pl-6">
+                <div className="relative space-y-2">
+                  <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-emerald-400 ring-4 ring-[#09090b]" />
+                  <span className="text-xs font-mono text-neutral-500">
+                    2025 - 2026
+                  </span>
+                  <h4 className="text-base font-semibold text-white">
+                    Cybersecurity Intern
+                  </h4>
+                  <p className="text-xs font-mono text-emerald-400">
+                    Cybercyte
+                  </p>
+                  <p className="text-xs text-neutral-400 leading-relaxed">
+                    {lang === "tr"
+                      ? "Sysmon log telemetrisi, EDR mimari ajan prototiplemesi, tarayıcı eklenti analizleri ve otonom sızma testi modelleri."
+                      : "Sysmon log telemetry, EDR agent prototyping, browser extension audits, and automated penetration testing models."}
+                  </p>
+                </div>
+
+                <div className="relative space-y-2">
+                  <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-neutral-600 ring-4 ring-[#09090b]" />
+                  <span className="text-xs font-mono text-neutral-500">
+                    2022 - 2023
+                  </span>
+                  <h4 className="text-base font-semibold text-white">
+                    Software Developer
+                  </h4>
+                  <p className="text-xs font-mono text-neutral-400">
+                    Maarif Metaverse (Startup)
+                  </p>
+                  <p className="text-xs text-neutral-400 leading-relaxed">
+                    {lang === "tr"
+                      ? "Unity ve C# altyapısıyla sanal etkileşimli eğitim simülasyonları geliştirilmesi."
+                      : "Building 3D interactive virtual learning spaces using Unity and C#."}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* EĞİTİM & DİL */}
+            <div className="p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-900/30 backdrop-blur-xl space-y-6">
+              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                <GraduationCap className="w-5 h-5 text-sky-400" />
+                {lang === "tr" ? "Eğitim & Diller" : "Education & Languages"}
+              </h3>
+
+              <div className="space-y-8 border-l border-neutral-800 pl-6">
+                <div className="relative space-y-2">
+                  <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-sky-400 ring-4 ring-[#09090b]" />
+                  <span className="text-xs font-mono text-neutral-500">
+                    2021 - 2026
+                  </span>
+                  <h4 className="text-base font-semibold text-white">
+                    {lang === "tr"
+                      ? "Karabük Üniversitesi"
+                      : "Karabük University"}
+                  </h4>
+                  <p className="text-xs font-mono text-sky-400">
+                    {lang === "tr"
+                      ? "Bilgisayar Mühendisliği Lisans"
+                      : "B.Sc. in Computer Engineering"}
+                  </p>
+                  <p className="text-xs text-neutral-400">GPA: 2.82</p>
+                </div>
+
+                <div className="relative space-y-2">
+                  <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-neutral-600 ring-4 ring-[#09090b]" />
+                  <span className="text-xs font-mono text-neutral-500">
+                    2016 - 2020
+                  </span>
+                  <h4 className="text-base font-semibold text-white">
+                    KÜPKÖK 1112 Anadolu Lisesi
+                  </h4>
+                  <p className="text-xs text-neutral-400 font-mono">
+                    {lang === "tr" ? "Lise Diploması" : "High School Diploma"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t border-neutral-800/60 flex items-center justify-between text-xs">
+                <span className="text-neutral-400 font-medium">
+                  {lang === "tr" ? "İngilizce Seviyesi" : "English"}
+                </span>
+                <span className="font-mono text-emerald-400 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-900/40">
+                  A2 - B1 Technical
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* TEKNOLOJİ & YETKİNLİKLER */}
+        <section className="space-y-8">
+          <div className="space-y-2">
+            <span className="text-xs font-mono uppercase tracking-widest text-emerald-400">
+              {t.skillsSubtitle}
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
+              {t.skillsTitle}
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 text-xs font-mono">
+            {[
+              { name: "C# & .NET", level: "Advanced" },
+              { name: "Sysmon Telemetry", level: "Specialist" },
+              { name: "Windows Internals", level: "Intermediate" },
+              { name: "EDR Architecture", level: "Advanced" },
+              { name: "Python / ML", level: "Intermediate" },
+              { name: "Flutter & Dart", level: "Intermediate" },
+              { name: "SQLite & SQL", level: "Intermediate" },
+              { name: "Threat Hunting", level: "SOC Operations" },
+            ].map((item, i) => (
+              <div
+                key={i}
+                className="p-4 rounded-2xl bg-neutral-900/30 border border-neutral-800/80 space-y-1 hover:border-neutral-700 transition"
+              >
+                <div className="font-semibold text-white">{item.name}</div>
+                <div className="text-[11px] text-neutral-500">{item.level}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* İLETİŞİM (CONTACT) */}
+        <section
+          id="contact"
+          className="p-8 sm:p-12 rounded-3xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-xl space-y-8"
+        >
+          <div className="space-y-3 max-w-2xl">
+            <span className="text-xs font-mono uppercase tracking-widest text-emerald-400">
+              {t.contactSubtitle}
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white">
+              {t.contactTitle}
+            </h2>
+            <p className="text-neutral-400 text-sm sm:text-base leading-relaxed">
+              {t.contactDesc}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-4 pt-2">
+            <a
+              href="mailto:m.dag0524@gmail.com"
+              className="flex items-center gap-2 px-7 py-3.5 rounded-full bg-white text-black font-semibold text-sm hover:bg-neutral-200 transition"
+            >
+              <Mail className="w-4 h-4" />
+              <span>m.dag0524@gmail.com</span>
             </a>
 
             <a
               href="https://www.linkedin.com/in/mustafa-da%C4%9F-63609524a/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-800 bg-neutral-950/80 backdrop-blur-md hover:border-neutral-500 hover:bg-neutral-900 transition-all text-xs tracking-wider"
+              className="flex items-center gap-2 px-7 py-3.5 rounded-full border border-neutral-800 bg-neutral-950 text-neutral-300 hover:text-white hover:border-neutral-600 transition text-sm"
             >
-              <LinkedinIcon className="text-sky-400" />
+              <LinkedinIcon />
               <span>LinkedIn</span>
             </a>
 
             <a
-              href="mailto:m.dag0524@gmail.com"
-              className="flex items-center gap-2 px-5 py-2.5 rounded-full border border-neutral-800 bg-neutral-950/80 backdrop-blur-md hover:border-neutral-500 hover:bg-neutral-900 transition-all text-xs tracking-wider"
-            >
-              <Mail className="w-4 h-4 text-emerald-400" />
-              <span>{lang === "tr" ? "İletişim" : "Contact"}</span>
-            </a>
-
-            <button
-              onClick={scrollToContent}
-              className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-white text-black hover:bg-neutral-200 transition-all text-xs font-semibold tracking-wider cursor-pointer"
-            >
-              <span>
-                {lang === "tr" ? "Projeleri İncele" : "Explore Details"}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        <button
-          onClick={scrollToContent}
-          className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 text-neutral-500 hover:text-white transition-colors cursor-pointer"
-        >
-          <span className="text-[10px] tracking-widest uppercase font-mono">
-            {lang === "tr" ? "Aşağı Kaydır" : "Scroll Down"}
-          </span>
-          <ChevronDown className="w-4 h-4 animate-bounce" />
-        </button>
-      </section>
-
-      {/* İÇERİK BÖLÜMÜ */}
-      <div
-        id="about"
-        className="relative z-10 py-24 px-6 max-w-5xl mx-auto space-y-28"
-      >
-        {/* 1. SAYFANIN HEMEN ALTINDAKİ ÖZET PROFİL */}
-        <section className="p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-xl shadow-2xl">
-          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-emerald-400 mb-3">
-            <Sparkles className="w-4 h-4" />
-            {lang === "tr" ? "Özet Profil" : "Executive Summary"}
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-light text-white mb-4">
-            {lang === "tr"
-              ? "Sistem & Siber Savunma Mühendisliği"
-              : "Systems & Cyber Defense Engineering"}
-          </h2>
-          <p className="text-neutral-300 leading-relaxed text-sm sm:text-base font-light">
-            {lang === "tr"
-              ? "Karabük Üniversitesi Bilgisayar Mühendisliği mezunuyum. Uç nokta tespiti ve müdahalesi (EDR), Windows iç mimarisi (Windows Internals), Sysmon telemetri analizi ve tehdit avcılığı (Threat Hunting) odaklı çalışmalar yürütüyorum. Cybercyte bünyesindeki staj tecrübem ve geliştirdiğim hibrit EDR projesiyle; şüpheli süreçlerin tespiti, sezgisel entropi hesaplamaları, bellek/dosya analizleri ve otonom siber güvenlik mimarileri üzerine uzmanlaştım."
-              : "Computer Engineering graduate from Karabük University. Focused on Endpoint Detection and Response (EDR), Windows Internals, Sysmon telemetry auditing, and proactive Threat Hunting. Through long-term cybersecurity internship experience at Cybercyte and the hybrid EDR project, I specialize in detecting anomalous processes, heuristic entropy modeling, file/memory verification, and automated SOC response architectures."}
-          </p>
-        </section>
-
-        {/* İNTERAKTİF SİBER GÜVENLİK TERMİNALİ */}
-        <section className="rounded-3xl border border-neutral-800/80 bg-neutral-950/85 backdrop-blur-xl overflow-hidden shadow-2xl">
-          <div className="flex items-center justify-between px-6 py-3 border-b border-neutral-800/80 bg-neutral-900/50">
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500/80" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500/80" />
-              <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
-              <span className="ml-2 text-xs font-mono text-neutral-400 flex items-center gap-1.5">
-                <TerminalIcon className="w-3.5 h-3.5 text-emerald-400" />{" "}
-                dagsec-threat-cli
-              </span>
-            </div>
-            <button
-              onClick={runSimulation}
-              disabled={isSimulating}
-              className="flex items-center gap-1.5 px-3 py-1 rounded-md text-[11px] font-mono bg-emerald-950/60 border border-emerald-800/50 text-emerald-400 hover:bg-emerald-900/60 transition disabled:opacity-50 cursor-pointer"
-            >
-              <Play className="w-3 h-3" />
-              {isSimulating
-                ? lang === "tr"
-                  ? "Analiz Yapılıyor..."
-                  : "Analyzing..."
-                : lang === "tr"
-                  ? "Tehdit Simülasyonu Çalıştır"
-                  : "Simulate Attack"}
-            </button>
-          </div>
-
-          <div
-            ref={terminalContainerRef}
-            className="p-6 font-mono text-xs space-y-2 h-56 overflow-y-auto"
-          >
-            {terminalLogs.map((log, i) => (
-              <div
-                key={i}
-                className={
-                  log.startsWith("[!]")
-                    ? "text-red-400 font-semibold"
-                    : log.startsWith("[*]")
-                      ? "text-emerald-400"
-                      : log.startsWith(">")
-                        ? "text-white"
-                        : "text-neutral-400"
-                }
-              >
-                {log}
-              </div>
-            ))}
-          </div>
-
-          <form
-            onSubmit={handleTerminalSubmit}
-            className="flex border-t border-neutral-800/80 bg-neutral-900/30"
-          >
-            <span className="pl-6 py-3 text-xs font-mono text-emerald-400 select-none">
-              &gt;
-            </span>
-            <input
-              type="text"
-              value={terminalInput}
-              onChange={(e) => setTerminalInput(e.target.value)}
-              placeholder={
-                lang === "tr"
-                  ? "Komut girin ('help', 'scan', 'status')..."
-                  : "Enter command ('help', 'scan', 'status')..."
-              }
-              className="w-full bg-transparent px-3 py-3 text-xs font-mono text-white focus:outline-hidden placeholder:text-neutral-600"
-            />
-          </form>
-        </section>
-
-        {/* EDR MİMARİSİ VE AKIŞ ŞEMASI */}
-        <section className="p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-xl shadow-2xl space-y-6">
-          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-emerald-400">
-            <Activity className="w-4 h-4" />
-            {lang === "tr" ? "Sistem Mimarisi" : "System Architecture"}
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-light text-white">
-            {lang === "tr"
-              ? "Hibrit EDR Telemetri & Analiz Akışı"
-              : "Hybrid EDR Telemetry & Verification Flow"}
-          </h2>
-          <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed">
-            {lang === "tr"
-              ? "Geliştirdiğim EDR ajanının çekirdekten gelen telemetriyi yakalayıp yanıt üretme adımlarını içeren 4 katmanlı veri boru hattı (pipeline):"
-              : "The 4-layer telemetry pipeline engineered into the hybrid EDR agent from raw kernel hooks to automated SOC remediation:"}
-          </p>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-2">
-            <div className="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800 space-y-2">
-              <span className="text-[10px] font-mono text-emerald-400">
-                01. INGESTION
-              </span>
-              <h4 className="text-sm font-medium text-white flex items-center gap-1.5">
-                <Search className="w-4 h-4 text-emerald-400" /> Sysmon Hooks
-              </h4>
-              <p className="text-xs text-neutral-400 leading-relaxed">
-                {lang === "tr"
-                  ? "Event ID 1, 3 ve 7 üzerinden proses yaratma, ağ bağlantısı ve DLL yüklemeleri dinlenir."
-                  : "Hooks Process Creation (ID 1), Network Connections (ID 3), and DLL Loads (ID 7)."}
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800 space-y-2">
-              <span className="text-[10px] font-mono text-sky-400">
-                02. HEURISTICS
-              </span>
-              <h4 className="text-sm font-medium text-white flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-sky-400" /> Entropy Engine
-              </h4>
-              <p className="text-xs text-neutral-400 leading-relaxed">
-                {lang === "tr"
-                  ? "Çalıştırılabilir dosyanın PE bölümleri üzerinde Shannon Entropi formülüyle paketlenmiş/gizlenmiş kod aranır."
-                  : "Computes Shannon entropy across PE sections to reveal packed payloads and obfuscation."}
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800 space-y-2">
-              <span className="text-[10px] font-mono text-amber-400">
-                03. INTELLIGENCE
-              </span>
-              <h4 className="text-sm font-medium text-white flex items-center gap-1.5">
-                <Database className="w-4 h-4 text-amber-400" /> SQLite & VT API
-              </h4>
-              <p className="text-xs text-neutral-400 leading-relaxed">
-                {lang === "tr"
-                  ? "SHA-256 hashleri yerel SQLite önbelleğinde sorgulanır, bilinmeyen dosyalar VirusTotal API ile doğrulanır."
-                  : "Checks SHA-256 in local SQLite cache; triggers cloud threat queries via VirusTotal API."}
-              </p>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-neutral-900/60 border border-neutral-800 space-y-2">
-              <span className="text-[10px] font-mono text-red-400">
-                04. RESPONSE
-              </span>
-              <h4 className="text-sm font-medium text-white flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-red-400" /> Quarantine
-                Action
-              </h4>
-              <p className="text-xs text-neutral-400 leading-relaxed">
-                {lang === "tr"
-                  ? "Yüksek tehdit skorlu proses otonom olarak sonlandırılır, şüpheli ikili karantinaya alınarak loglanır."
-                  : "Terminates malicious process IDs, quarantines zero-day binaries, and broadcasts SOC alerts."}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* PROJELER */}
-        <section>
-          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-emerald-400 mb-2">
-            <TerminalIcon className="w-4 h-4" />
-            {lang === "tr" ? "Mühendislik Projeleri" : "Featured Projects"}
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-light text-white mb-10 border-b border-neutral-900 pb-4">
-            {lang === "tr"
-              ? "Teknik Analiz, Sağlanan Fayda & Kazanımlar"
-              : "Technical Architecture, Impact & Takeaways"}
-          </h2>
-
-          <div className="space-y-10">
-            <div className="p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-xl hover:border-neutral-700 transition-all duration-300 space-y-6 shadow-2xl">
-              <div className="flex flex-wrap justify-between items-start gap-3">
-                <div>
-                  <span className="text-[11px] font-mono text-emerald-400 uppercase tracking-wider bg-emerald-950/40 border border-emerald-800/40 px-3 py-1 rounded-full">
-                    {lang === "tr"
-                      ? "Bitirme Tezi & Güvenlik Mimarisi"
-                      : "Graduation Thesis & Security Arch"}
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-medium text-white mt-3">
-                    {lang === "tr"
-                      ? "Sysmon & Sezgisel Analiz Tabanlı Hibrit Uç Nokta Tehdit Algılama (EDR)"
-                      : "Sysmon & Heuristic-Based Hybrid Endpoint Threat Detection System (EDR)"}
-                  </h3>
-                </div>
-                <ShieldCheck className="w-7 h-7 text-emerald-400 shrink-0" />
-              </div>
-
-              <p className="text-neutral-300 text-sm sm:text-base leading-relaxed">
-                {lang === "tr"
-                  ? "Windows uç noktalarında çalışan süreçleri gerçek zamanlı Sysmon Event Log telemetrisi üzerinden dinleyen, zararlı aktiviteleri sezgisel ve statik yöntemlerle ayrıştıran hibrit bir EDR ajanı."
-                  : "A hybrid EDR agent monitoring Windows endpoints in real-time using Sysmon Event Log telemetry, distinguishing malicious activities through combined heuristic and static verification pipelines."}
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs sm:text-sm">
-                <div className="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 space-y-3">
-                  <div className="font-semibold text-white flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    {lang === "tr"
-                      ? "Sisteme & Kullanıcıya Faydası"
-                      : "System Benefits & Real Impact"}
-                  </div>
-                  <ul className="list-disc list-inside text-neutral-400 space-y-1.5 leading-relaxed text-xs">
-                    {lang === "tr" ? (
-                      <>
-                        <li>
-                          Geleneksel imza tabanlı antivirüslerin kaçırdığı
-                          sıfırıncı gün ve paketlenmiş zararlıları Shannon
-                          Entropi formülüyle sezgisel tespit eder.
-                        </li>
-                        <li>
-                          VirusTotal API entegrasyonu ve yerel SQLite
-                          önbellekleme sayesinde yinelenen sorguları engeller,
-                          ağ yükünü minimize eder.
-                        </li>
-                        <li>
-                          Dijital imza doğrulama ile sahte sistem ikili
-                          dosyalarını filtreleyerek yanlış alarm oranını
-                          düşürür.
-                        </li>
-                      </>
-                    ) : (
-                      <>
-                        <li>
-                          Heuristically detects packed & 0-day malware using
-                          Shannon entropy calculations where traditional
-                          signature AVs fall short.
-                        </li>
-                        <li>
-                          Minimizes network bandwidth & API quota exhaustion via
-                          local SQLite hash caching paired with VirusTotal API.
-                        </li>
-                        <li>
-                          Validates authentic digital signatures to minimize
-                          false positives against native Windows OS binaries.
-                        </li>
-                      </>
-                    )}
-                  </ul>
-                </div>
-
-                <div className="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 space-y-3">
-                  <div className="font-semibold text-white flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-sky-400 shrink-0" />
-                    {lang === "tr"
-                      ? "Bana Kattığı Vizyon ve Kazanımlar"
-                      : "Personal & Technical Takeaways"}
-                  </div>
-                  <ul className="list-disc list-inside text-neutral-400 space-y-1.5 leading-relaxed text-xs">
-                    {lang === "tr" ? (
-                      <>
-                        <li>
-                          Windows API, servis mimarileri, event log kanalları ve
-                          proses telemetrisi konularında derin kernel/user-mode
-                          anlayışı.
-                        </li>
-                        <li>
-                          Yüksek veri akışı altında C# ile asenkron thread
-                          yönetimi, verimli bellek tahsisi ve performans
-                          optimizasyonu tecrübesi.
-                        </li>
-                        <li>
-                          Bir SOC analistinin ihtiyaç duyacağı log korelasyonu
-                          ve olay müdahale (IR) karar mekanizmalarını bizzat
-                          kodlama pratiği.
-                        </li>
-                      </>
-                    ) : (
-                      <>
-                        <li>
-                          In-depth kernel/user-mode telemetry understanding:
-                          Windows Event Log channels, service agents, and
-                          process internals.
-                        </li>
-                        <li>
-                          High-throughput concurrent C# programming,
-                          asynchronous event dispatching, and optimized memory
-                          consumption.
-                        </li>
-                        <li>
-                          Hands-on experience architecting incident response
-                          workflows and telemetry correlation required by modern
-                          SOC teams.
-                        </li>
-                      </>
-                    )}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2 pt-2">
-                {[
-                  "C#",
-                  ".NET Framework",
-                  "Sysmon",
-                  "VirusTotal API",
-                  "Shannon Entropy",
-                  "SQLite",
-                  "Threat Hunting",
-                ].map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[11px] font-mono text-neutral-300 bg-neutral-900 border border-neutral-800 px-3 py-1 rounded-full"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-xl hover:border-neutral-700 transition-all duration-300 space-y-6 shadow-2xl">
-              <div className="flex flex-wrap justify-between items-start gap-3">
-                <div>
-                  <span className="text-[11px] font-mono text-sky-400 uppercase tracking-wider bg-sky-950/40 border border-sky-800/40 px-3 py-1 rounded-full">
-                    {lang === "tr"
-                      ? "Mobil & Donanım Entegrasyonu"
-                      : "Mobile & Embedded Integration"}
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-medium text-white mt-3">
-                    {lang === "tr"
-                      ? "Flutter & ESP32 Tabanlı Canlı Enerji İzleme ve Yönetim Paneli"
-                      : "Flutter & ESP32-Powered Realtime Energy Monitoring Dashboard"}
-                  </h3>
-                </div>
-                <Cpu className="w-7 h-7 text-sky-400 shrink-0" />
-              </div>
-
-              <p className="text-neutral-300 text-sm sm:text-base leading-relaxed">
-                {lang === "tr"
-                  ? "ESP32 mikrodenetleyicisi ile toplanan anlık akım, voltaj ve tüketim verilerini Firebase Realtime Database üzerinde senkronize eden ve Flutter mobil uygulaması üzerinden grafiklerle görselleştiren uçtan uca IoT ekosistemi."
-                  : "An end-to-end IoT system capturing telemetry (voltage, current, power) via ESP32 microcontrollers, streaming live data to Firebase Realtime Database, and rendering real-time performance analytics in a Flutter mobile client."}
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs sm:text-sm">
-                <div className="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 space-y-3">
-                  <div className="font-semibold text-white flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    {lang === "tr"
-                      ? "Sisteme & Kullanıcıya Faydası"
-                      : "System Benefits & Real Impact"}
-                  </div>
-                  <ul className="list-disc list-inside text-neutral-400 space-y-1.5 leading-relaxed text-xs">
-                    {lang === "tr" ? (
-                      <>
-                        <li>
-                          Tüketim anomalilerini ve beklenmeyen voltaj
-                          dalgalanmalarını anlık olarak kullanıcıya bildirir,
-                          donanım arızalarını önler.
-                        </li>
-                        <li>
-                          Geçmişe dönük enerji harcama raporları sunarak
-                          işletmeler ve ev kullanıcıları için maliyet
-                          optimizasyonu sağlar.
-                        </li>
-                      </>
-                    ) : (
-                      <>
-                        <li>
-                          Immediately detects voltage anomalies and abnormal
-                          spikes, safeguarding connected electronic appliances.
-                        </li>
-                        <li>
-                          Provides historical consumption auditing to optimize
-                          electricity overhead for both commercial and
-                          residential setups.
-                        </li>
-                      </>
-                    )}
-                  </ul>
-                </div>
-
-                <div className="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 space-y-3">
-                  <div className="font-semibold text-white flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-sky-400 shrink-0" />
-                    {lang === "tr"
-                      ? "Bana Kattığı Vizyon ve Kazanımlar"
-                      : "Personal & Technical Takeaways"}
-                  </div>
-                  <ul className="list-disc list-inside text-neutral-400 space-y-1.5 leading-relaxed text-xs">
-                    {lang === "tr" ? (
-                      <>
-                        <li>
-                          Flutter ile durum yönetimi (State Management),
-                          asenkron veri akışları ve reaktif UI tasarlama
-                          tecrübesi.
-                        </li>
-                        <li>
-                          Gömülü donanım ile bulut veritabanı arasındaki veri
-                          paketleme ve seri haberleşme optimizasyon becerisi.
-                        </li>
-                      </>
-                    ) : (
-                      <>
-                        <li>
-                          Mastered state management, dynamic reactive streams,
-                          and custom analytics dashboard construction in
-                          Flutter.
-                        </li>
-                        <li>
-                          Hands-on calibration of embedded UART/Wi-Fi serial
-                          interfaces and cloud network latency tolerance on
-                          ESP32.
-                        </li>
-                      </>
-                    )}
-                  </ul>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2 pt-2">
-                {[
-                  "Flutter",
-                  "Dart",
-                  "Android Studio",
-                  "ESP32",
-                  "Firebase Realtime DB",
-                  "IoT",
-                ].map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[11px] font-mono text-neutral-300 bg-neutral-900 border border-neutral-800 px-3 py-1 rounded-full"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-xl hover:border-neutral-700 transition-all duration-300 space-y-6 shadow-2xl">
-              <div className="flex flex-wrap justify-between items-start gap-3">
-                <div>
-                  <span className="text-[11px] font-mono text-amber-400 uppercase tracking-wider bg-amber-950/40 border border-amber-800/40 px-3 py-1 rounded-full">
-                    {lang === "tr"
-                      ? "Yapay Zeka & Veri Bilimi"
-                      : "Machine Learning & Analytics"}
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-medium text-white mt-3">
-                    {lang === "tr"
-                      ? "Python ile Konut Kira Fiyatı Tahmin ve Analiz Modeli"
-                      : "Real Estate Rent Price Estimation & Heuristic Regression Model"}
-                  </h3>
-                </div>
-                <LineChart className="w-7 h-7 text-amber-400 shrink-0" />
-              </div>
-
-              <p className="text-neutral-300 text-sm sm:text-base leading-relaxed">
-                {lang === "tr"
-                  ? "Açık kaynaklı veri setleri üzerinde aykırı değer temizleme, özellik mühendisliği ve regresyon algoritmaları uygulanarak konut kira değerlerini tahminleyen analitik model."
-                  : "An analytical machine learning pipeline built on open datasets executing outlier elimination, feature scaling, and regression algorithms to predict real estate rent pricing."}
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs sm:text-sm">
-                <div className="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 space-y-3">
-                  <div className="font-semibold text-white flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    {lang === "tr"
-                      ? "Sisteme & Kullanıcıya Faydası"
-                      : "System Benefits & Real Impact"}
-                  </div>
-                  <p className="text-neutral-400 leading-relaxed text-xs">
-                    {lang === "tr"
-                      ? "Piyasadaki manipülatif fiyatlandırmaları tespit eder, gayrimenkul yatırımcıları ve kiracılar için konum tabanlı adil fiyat aralığı çıkarır."
-                      : "Uncovers market price anomalies and computes fair price baselines for tenants and property investors based on spatial features."}
-                  </p>
-                </div>
-
-                <div className="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 space-y-3">
-                  <div className="font-semibold text-white flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-sky-400 shrink-0" />
-                    {lang === "tr"
-                      ? "Bana Kattığı Vizyon ve Kazanımlar"
-                      : "Personal & Technical Takeaways"}
-                  </div>
-                  <p className="text-neutral-400 leading-relaxed text-xs">
-                    {lang === "tr"
-                      ? "Büyük veri setlerini işleme, eksik verileri mantıksal tamamlama ve istatistiksel metriklerle model başarı testleri yapma yetkinliği."
-                      : "Strengthened skills in large-scale dataset sanitization, correlation matrices, hyperparameter tuning, and error benchmarking."}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2 pt-2">
-                {[
-                  "Python",
-                  "Jupyter Notebook",
-                  "Pandas",
-                  "NumPy",
-                  "Scikit-Learn",
-                  "Feature Engineering",
-                ].map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[11px] font-mono text-neutral-300 bg-neutral-900 border border-neutral-800 px-3 py-1 rounded-full"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-xl hover:border-neutral-700 transition-all duration-300 space-y-6 shadow-2xl">
-              <div className="flex flex-wrap justify-between items-start gap-3">
-                <div>
-                  <span className="text-[11px] font-mono text-purple-400 uppercase tracking-wider bg-purple-950/40 border border-purple-800/40 px-3 py-1 rounded-full">
-                    {lang === "tr"
-                      ? "Simülasyon & Startup"
-                      : "Simulation & Startup"}
-                  </span>
-                  <h3 className="text-xl sm:text-2xl font-medium text-white mt-3">
-                    {lang === "tr"
-                      ? "Maarif Metaverse: Unity Tabanlı Etkileşimli Eğitim Ortamı"
-                      : "Maarif Metaverse: Unity-Based Interactive Virtual Learning Environment"}
-                  </h3>
-                </div>
-                <Box className="w-7 h-7 text-purple-400 shrink-0" />
-              </div>
-
-              <p className="text-neutral-300 text-sm sm:text-base leading-relaxed">
-                {lang === "tr"
-                  ? "Eğitim amaçlı startup bünyesinde 1 yıl boyunca Unity oyun motoru ve C# ile geliştirilen, öğrencilerin 3D simüle edilmiş sanal dersliklerde etkileşime girmesini sağlayan sanal evren projesi."
-                  : "A one-year startup development project crafting a 3D virtual educational metaverse using Unity and C#, enabling students to interact in real-time simulated educational spaces."}
-              </p>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-xs sm:text-sm">
-                <div className="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 space-y-3">
-                  <div className="font-semibold text-white flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                    {lang === "tr"
-                      ? "Sisteme & Kullanıcıya Faydası"
-                      : "System Benefits & Real Impact"}
-                  </div>
-                  <p className="text-neutral-400 leading-relaxed text-xs">
-                    {lang === "tr"
-                      ? "Uzaktan eğitim süreçlerini oyunlaştırarak öğrenci katılımını artırdı; fiziksel laboratuvar deneylerini sanal ortamda simüle etti."
-                      : "Gamified remote schooling to boost student retention while virtually recreating laboratory exercises safely."}
-                  </p>
-                </div>
-
-                <div className="p-5 rounded-2xl bg-neutral-900/60 border border-neutral-800/80 space-y-3">
-                  <div className="font-semibold text-white flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-sky-400 shrink-0" />
-                    {lang === "tr"
-                      ? "Bana Kattığı Vizyon ve Kazanımlar"
-                      : "Personal & Technical Takeaways"}
-                  </div>
-                  <p className="text-neutral-400 leading-relaxed text-xs">
-                    {lang === "tr"
-                      ? "3D nesne hiyerarşisi, fizik motorları, sahne optimizasyonları ve çevik startup ekibiyle çalışma disiplini kazandırdı."
-                      : "Gained hands-on experience in 3D scene optimization, physics computations, asset lifecycle management, and agile startup workflows."}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-2 pt-2">
-                {[
-                  "Unity 3D",
-                  "C#",
-                  "Virtual Reality / Metaverse",
-                  "Interactive UI",
-                ].map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[11px] font-mono text-neutral-300 bg-neutral-900 border border-neutral-800 px-3 py-1 rounded-full"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* DENEYİM & EĞİTİM */}
-        <section className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          <div className="p-8 rounded-3xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-xl shadow-2xl">
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-emerald-400 mb-2">
-              <Briefcase className="w-4 h-4" />
-              {lang === "tr" ? "Profesyonel Deneyim" : "Work Experience"}
-            </div>
-            <h3 className="text-2xl font-light text-white mb-6 border-b border-neutral-900 pb-3">
-              {lang === "tr" ? "Kariyer Geçmişi" : "Professional History"}
-            </h3>
-
-            <div className="space-y-8 border-l border-neutral-800 pl-5">
-              <div className="relative space-y-1.5">
-                <div className="absolute -left-[27px] top-1.5 w-3 h-3 rounded-full bg-emerald-400 ring-4 ring-black" />
-                <span className="text-xs font-mono text-neutral-400">
-                  2025 - 2026
-                </span>
-                <h4 className="text-base font-medium text-white">
-                  {lang === "tr"
-                    ? "Uzun Dönem Siber Güvenlik Stajyeri"
-                    : "Long-Term Cybersecurity Intern"}
-                </h4>
-                <p className="text-xs text-emerald-400 font-mono">Cybercyte</p>
-                <ul className="text-xs text-neutral-400 list-disc list-inside space-y-1.5 pt-1.5 leading-relaxed">
-                  {lang === "tr" ? (
-                    <>
-                      <li>
-                        Sysmon ve sezgisel analiz tabanlı otonom Hibrit EDR
-                        sistemi tasarımı ve prototiplenmesi.
-                      </li>
-                      <li>
-                        Uç noktalardan veri toplama, tarayıcı eklentilerinin
-                        güvenlik analizleri ve şüpheli aktivite denetimi.
-                      </li>
-                      <li>
-                        Çoklu ajan tabanlı otonom sızma testi yaklaşımları ve
-                        tehdit modelleme çalışmaları.
-                      </li>
-                    </>
-                  ) : (
-                    <>
-                      <li>
-                        Architected an autonomous hybrid EDR system leveraging
-                        Sysmon telemetry and heuristic verification.
-                      </li>
-                      <li>
-                        Audited browser extensions, endpoint telemetry
-                        gathering, and anomalous threat vector detection.
-                      </li>
-                      <li>
-                        Conducted research into multi-agent autonomous
-                        penetration testing models and threat surface modeling.
-                      </li>
-                    </>
-                  )}
-                </ul>
-              </div>
-
-              <div className="relative space-y-1.5 pt-4">
-                <div className="absolute -left-[27px] top-5 w-3 h-3 rounded-full bg-neutral-600 ring-4 ring-black" />
-                <span className="text-xs font-mono text-neutral-400">
-                  2022 - 2023
-                </span>
-                <h4 className="text-base font-medium text-white">
-                  {lang === "tr"
-                    ? "Yazılım Geliştirici - Maarif Metaverse"
-                    : "Software Developer - Maarif Metaverse"}
-                </h4>
-                <p className="text-xs text-neutral-400 font-mono">Startup</p>
-                <p className="text-xs text-neutral-400 leading-relaxed">
-                  {lang === "tr"
-                    ? "Eğitim amaçlı startup projesinde 1 yıl boyunca Unity ve C# tabanlı sanal etkileşimli mekanikler geliştirildi."
-                    : "Developed interactive virtual classroom mechanics using Unity 3D and C# over a 1-year startup incubation cycle."}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-8 rounded-3xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-xl shadow-2xl">
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-emerald-400 mb-2">
-              <GraduationCap className="w-4 h-4" />
-              {lang === "tr" ? "Akademik Geçmiş" : "Education & Languages"}
-            </div>
-            <h3 className="text-2xl font-light text-white mb-6 border-b border-neutral-900 pb-3">
-              {lang === "tr" ? "Eğitim & Diller" : "Academic Credentials"}
-            </h3>
-
-            <div className="space-y-6 border-l border-neutral-800 pl-5">
-              <div className="relative space-y-1.5">
-                <div className="absolute -left-[27px] top-1.5 w-3 h-3 rounded-full bg-sky-400 ring-4 ring-black" />
-                <span className="text-xs font-mono text-neutral-400">
-                  2021 - 2026
-                </span>
-                <h4 className="text-base font-medium text-white">
-                  {lang === "tr"
-                    ? "Karabük Üniversitesi"
-                    : "Karabük University"}
-                </h4>
-                <p className="text-xs text-sky-400 font-mono">
-                  {lang === "tr"
-                    ? "Bilgisayar Mühendisliği / Mühendislik Fakültesi"
-                    : "Computer Engineering / Faculty of Engineering"}
-                </p>
-                <p className="text-xs text-neutral-400">GPA: 2.82</p>
-              </div>
-
-              <div className="relative space-y-1.5 pt-2">
-                <div className="absolute -left-[27px] top-3.5 w-3 h-3 rounded-full bg-neutral-600 ring-4 ring-black" />
-                <span className="text-xs font-mono text-neutral-400">
-                  2016 - 2020
-                </span>
-                <h4 className="text-base font-medium text-white">
-                  KÜPKÖK 1112 Anadolu Lisesi
-                </h4>
-                <p className="text-xs text-neutral-400 font-mono">
-                  {lang === "tr" ? "Lise Diploması" : "High School Diploma"}
-                </p>
-              </div>
-
-              <div className="pt-4 space-y-2">
-                <h5 className="text-xs font-mono uppercase tracking-wider text-white">
-                  {lang === "tr"
-                    ? "Yabancı Dil Seviyesi"
-                    : "Language Proficiency"}
-                </h5>
-                <div className="flex items-center justify-between p-3.5 rounded-xl bg-neutral-900/60 border border-neutral-800 text-xs">
-                  <span className="text-white font-medium">
-                    {lang === "tr" ? "İngilizce" : "English"}
-                  </span>
-                  <span className="font-mono text-emerald-400 bg-emerald-950/60 px-2.5 py-0.5 rounded border border-emerald-800/40">
-                    B1 (Technical & Professional)
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* YETKİNLİKLER */}
-        <section>
-          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-emerald-400 mb-2">
-            <Cpu className="w-4 h-4" />
-            {lang === "tr"
-              ? "Teknik Donanım & Yetkinlikler"
-              : "Technical Proficiencies"}
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-light text-white mb-10 border-b border-neutral-900 pb-4">
-            {lang === "tr"
-              ? "CV ve Proje Odaklı Beceri Matrisi"
-              : "Curriculum & Project-Based Skill Matrix"}
-          </h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-xs">
-            <div className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-xl space-y-3 shadow-xl">
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-white text-sm">
-                  C# & .NET
-                </span>
-                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">
-                  {lang === "tr" ? "Orta - İleri" : "Mid - Advanced"}
-                </span>
-              </div>
-              <p className="text-neutral-400 leading-relaxed">
-                {lang === "tr"
-                  ? "Konsol, WinForms, Arka Plan Windows Servisleri, Sysmon Güvenlik Ajanı Mimarisi ve REST API Entegrasyonları."
-                  : "Console, WinForms, Windows Background Services, Sysmon Security Agent Architecture, and REST API Integrations."}
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-xl space-y-3 shadow-xl">
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-white text-sm">
-                  Cybersecurity & SOC
-                </span>
-                <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800/40">
-                  {lang === "tr" ? "Uzmanlık Odağı" : "Core Focus"}
-                </span>
-              </div>
-              <p className="text-neutral-400 leading-relaxed">
-                {lang === "tr"
-                  ? "Sysmon Log Analizi, Uç Nokta Tehdit Tespiti (EDR), Shannon Entropi, Hashleme, Otonom Sızma Testi ve Olay İnceleme."
-                  : "Sysmon Log Auditing, Endpoint Threat Detection (EDR), Shannon Entropy, Hashing, Autonomous PenTesting, Heuristic Models."}
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-xl space-y-3 shadow-xl">
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-white text-sm">
-                  Python & Machine Learning
-                </span>
-                <span className="text-[10px] font-mono text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/40">
-                  {lang === "tr" ? "Orta Seviye" : "Intermediate"}
-                </span>
-              </div>
-              <p className="text-neutral-400 leading-relaxed">
-                {lang === "tr"
-                  ? "Jupyter Notebook, Veri Ön İşleme, Özellik Mühendisliği ve Regresyon Algoritmaları."
-                  : "Jupyter Notebook, Data Preprocessing, Feature Engineering, Regression Algorithms & Exploratory Data Analysis."}
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-xl space-y-3 shadow-xl">
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-white text-sm">
-                  Flutter & Mobil
-                </span>
-                <span className="text-[10px] font-mono text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/40">
-                  {lang === "tr" ? "Başlangıç - Orta" : "Novice - Intermediate"}
-                </span>
-              </div>
-              <p className="text-neutral-400 leading-relaxed">
-                {lang === "tr"
-                  ? "Android Studio, Dart, Çapraz Platform Uygulama Geliştirme, Gerçek Zamanlı Enerji Verisi Görselleştirme."
-                  : "Android Studio, Dart, Cross-Platform Mobile Apps, Real-time Energy Monitoring Data Visualization."}
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-xl space-y-3 shadow-xl">
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-white text-sm">
-                  VBScript & Classic ASP
-                </span>
-                <span className="text-[10px] font-mono text-neutral-400 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
-                  {lang === "tr" ? "Temel Seviye" : "Foundational"}
-                </span>
-              </div>
-              <p className="text-neutral-400 leading-relaxed">
-                {lang === "tr"
-                  ? "Dinamik web uygulamaları mimarisi, sunucu tarafı betik yazımı ve klasik legacy backend mimarisi."
-                  : "Dynamic web patterns, server-side scripting, database bindings, and legacy system architecture."}
-              </p>
-            </div>
-
-            <div className="p-6 rounded-2xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-xl space-y-3 shadow-xl">
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-white text-sm">MATLAB</span>
-                <span className="text-[10px] font-mono text-neutral-400 bg-neutral-900 px-2 py-0.5 rounded border border-neutral-800">
-                  {lang === "tr"
-                    ? "Mühendislik Analizi"
-                    : "Engineering Analysis"}
-                </span>
-              </div>
-              <p className="text-neutral-400 leading-relaxed">
-                {lang === "tr"
-                  ? "Sayısal analiz, temel görüntü işleme algoritmaları ve mühendislik hesaplamaları."
-                  : "Numerical matrix computing, foundational image processing algorithms, and signal calculations."}
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* HIZLI İLETİŞİM FORMU */}
-        <section className="p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-950/80 backdrop-blur-xl shadow-2xl space-y-6">
-          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-emerald-400">
-            <Mail className="w-4 h-4" />
-            {lang === "tr" ? "Doğrudan İletişim" : "Get In Touch"}
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-light text-white">
-            {lang === "tr"
-              ? "Birlikte Proje Geliştirelim"
-              : "Let’s Collaborate & Secure Systems"}
-          </h2>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              window.location.href = "mailto:m.dag0524@gmail.com";
-            }}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono"
-          >
-            <input
-              type="text"
-              placeholder={
-                lang === "tr" ? "Adınız / Kurum" : "Your Name / Organization"
-              }
-              required
-              className="p-3.5 rounded-xl bg-neutral-900/70 border border-neutral-800 text-white focus:outline-hidden focus:border-emerald-500"
-            />
-            <input
-              type="email"
-              placeholder={lang === "tr" ? "E-posta Adresiniz" : "Your Email"}
-              required
-              className="p-3.5 rounded-xl bg-neutral-900/70 border border-neutral-800 text-white focus:outline-hidden focus:border-emerald-500"
-            />
-            <textarea
-              rows={3}
-              placeholder={
-                lang === "tr"
-                  ? "Mesajınız / Proje detayı..."
-                  : "Your Message / Security Inquiries..."
-              }
-              required
-              className="sm:col-span-2 p-3.5 rounded-xl bg-neutral-900/70 border border-neutral-800 text-white focus:outline-hidden focus:border-emerald-500"
-            />
-            <button
-              type="submit"
-              className="sm:col-span-2 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white text-black font-semibold hover:bg-neutral-200 transition cursor-pointer"
-            >
-              <Send className="w-4 h-4" />
-              <span>
-                {lang === "tr"
-                  ? "Mesajı Gönder (E-Posta Aç)"
-                  : "Dispatch Secure Message"}
-              </span>
-            </button>
-          </form>
-        </section>
-
-        {/* FOOTER */}
-        <footer className="border-t border-neutral-900 pt-10 pb-16 flex flex-col sm:flex-row items-center justify-between gap-6 text-xs text-neutral-500 font-mono">
-          <div className="space-y-1 text-center sm:text-left">
-            <p className="text-neutral-300 font-medium">
-              Mustafa Dağ — Nilüfer / Bursa
-            </p>
-            <p>m.dag0524@gmail.com | +90 551 257 24 37</p>
-          </div>
-
-          <div className="flex items-center gap-4">
-            <a
               href="https://github.com/mustafaadag"
               target="_blank"
               rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
+              className="flex items-center gap-2 px-7 py-3.5 rounded-full border border-neutral-800 bg-neutral-950 text-neutral-300 hover:text-white hover:border-neutral-600 transition text-sm"
             >
-              GitHub
-            </a>
-            <span>•</span>
-            <a
-              href="https://www.linkedin.com/in/mustafa-da%C4%9F-63609524a/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-white transition-colors"
-            >
-              LinkedIn
+              <GithubIcon />
+              <span>GitHub</span>
             </a>
           </div>
+        </section>
+
+        {/* FOOTER */}
+        <footer className="pt-12 border-t border-neutral-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-neutral-500">
+          <div>
+            © {new Date().getFullYear()} Mustafa Dağ. All rights reserved.
+          </div>
+          <div>Nilüfer, Bursa / Turkey</div>
         </footer>
-      </div>
-    </main>
+      </main>
+    </div>
   );
 }
