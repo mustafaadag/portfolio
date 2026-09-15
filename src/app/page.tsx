@@ -29,12 +29,13 @@ import {
   X,
   Zap,
   Info,
-  Sliders,
   AlertOctagon,
   FileCheck2,
   Clock,
+  Globe2,
 } from "lucide-react";
 
+// Lucide içinde bulunmayan veya çakışan ikonlar için doğrudan SVG bileşenleri
 function Linkedin(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -68,6 +69,23 @@ function Radar(props: React.SVGProps<SVGSVGElement>) {
       <path d="M16.24 7.76a6 6 0 0 0-8.48 0" />
       <path d="M12 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0-4 0" />
       <path d="m13.41 10.59 5.66-5.66" />
+    </svg>
+  );
+}
+
+function GitHubMark(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      {...props}
+    >
+      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+      <path d="M9 18c-4.51 2-5-2-7-2" />
     </svg>
   );
 }
@@ -176,23 +194,6 @@ const projects: Project[] = [
 
 function cn(...items: Array<string | false | null | undefined>) {
   return items.filter(Boolean).join(" ");
-}
-
-function GitHubMark(props: React.SVGProps<SVGSVGElement>) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      {...props}
-    >
-      <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
-      <path d="M9 18c-4.51 2-5-2-7-2" />
-    </svg>
-  );
 }
 
 function GridNoise() {
@@ -355,7 +356,6 @@ function SectionLabel({
   );
 }
 
-// Örnek Analiz Dosyaları Modeli
 type SampleFile = {
   name: string;
   entropy: number;
@@ -396,20 +396,24 @@ export default function Home() {
   const [lang, setLang] = useState<Lang>("tr");
   const [menuOpen, setMenuOpen] = useState(false);
   const [terminalInput, setTerminalInput] = useState("");
+
+  // ZİYARETÇİ IP VE LOKASYON TESPİT DURUMU
+  const [clientIp, setClientIp] = useState<string>("Analyzing...");
+  const [clientLocation, setClientLocation] = useState<string>("");
+
   const [terminalLogs, setTerminalLogs] = useState<string[]>([
-    "DAGSEC // DEFENSE CONSOLE v4.2",
+    "DAGSEC // DEFENSE CONSOLE v4.3",
     "Telemetry stream: ONLINE",
     "Sysmon collector: ATTACHED",
-    "Threat engine: READY",
-    "Type 'scan' or click the buttons below to trigger simulated incident response.",
+    "Scanning inbound network interface...",
   ]);
+
   const [simulating, setSimulating] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [activeProject, setActiveProject] = useState("edr");
   const [copied, setCopied] = useState(false);
   const terminalRef = useRef<HTMLDivElement | null>(null);
 
-  // Canlı Simülasyon Adımı ve Açıklama Paneli Durumu
   const [currentStep, setCurrentStep] = useState<number>(0);
   const [stepExplanation, setStepExplanation] = useState<{
     title: string;
@@ -422,10 +426,9 @@ export default function Home() {
     tag: "IDLE / MONITORING",
   });
 
-  // Canlı Sandbox Seçili Dosya
   const [activeFile, setActiveFile] = useState<SampleFile>(sampleFiles[0]);
 
-  // Sayfa Uptime Sayacı (Canlı çalışan SOC hissi)
+  // Canlı Uptime Sayacı
   const [uptime, setUptime] = useState(0);
   useEffect(() => {
     const timer = setInterval(() => setUptime((prev) => prev + 1), 1000);
@@ -440,6 +443,46 @@ export default function Home() {
     return `00:${m}:${s}`;
   };
 
+  // Ziyaretçinin IP Adresini ve Konumunu Çek
+  useEffect(() => {
+    fetch("https://ipapi.co/json/")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.ip) {
+          const ip = data.ip;
+          const loc = `${data.city || ""}, ${data.country_code || ""}`;
+          setClientIp(ip);
+          setClientLocation(loc);
+          setTerminalLogs((prev) => [
+            ...prev,
+            `[+] [INTERCEPT] Client Node IP: ${ip} | Location: ${loc || "Active"} | Security Check: MONITORED`,
+            "Threat engine: READY. Type 'scan' or use quick chips below.",
+          ]);
+        }
+      })
+      .catch(() => {
+        fetch("https://api.ipify.org?format=json")
+          .then((res) => res.json())
+          .then((d) => {
+            const ip = d.ip || "127.0.0.1";
+            setClientIp(ip);
+            setTerminalLogs((prev) => [
+              ...prev,
+              `[+] [INTERCEPT] Client Node IP: ${ip} | Security Check: MONITORED`,
+              "Threat engine: READY. Type 'scan' or use quick chips below.",
+            ]);
+          })
+          .catch(() => {
+            setClientIp("127.0.0.1");
+            setTerminalLogs((prev) => [
+              ...prev,
+              "[+] [INTERCEPT] Client Node IP: 127.0.0.1 (Local Session)",
+              "Threat engine: READY. Type 'scan' or use quick chips below.",
+            ]);
+          });
+      });
+  }, []);
+
   const tr = lang === "tr";
 
   useEffect(() => {
@@ -449,7 +492,6 @@ export default function Home() {
     });
   }, [terminalLogs]);
 
-  // Detaylı ve Anlaşılır Tehdit Simülasyonu
   const runSimulation = () => {
     if (simulating) return;
     setSimulating(true);
@@ -552,7 +594,7 @@ export default function Home() {
     } else if (cmd === "status") {
       setTerminalLogs((current) => [
         ...current,
-        "Engine: ONLINE | Telemetry: LIVE | Latency: 4ms | Remediation: ARMED",
+        `Engine: ONLINE | Telemetry: LIVE | Inbound Client: ${clientIp} | Status: ARMED`,
       ]);
     } else if (cmd === "skills") {
       setTerminalLogs((current) => [
@@ -562,7 +604,12 @@ export default function Home() {
     } else if (cmd === "entropy") {
       setTerminalLogs((current) => [
         ...current,
-        "Entropy Engine: Shannon section calculator active. Threshold: > 7.00 triggers alert.",
+        "Entropy Engine: Shannon section calculator active. Critical threshold: > 7.00.",
+      ]);
+    } else if (cmd === "whoami" || cmd === "myip") {
+      setTerminalLogs((current) => [
+        ...current,
+        `Remote Node: ${clientIp} | Geo: ${clientLocation || "Unknown"} | Traffic: Monitored`,
       ]);
     } else if (cmd === "clear") {
       setTerminalLogs([]);
@@ -570,7 +617,7 @@ export default function Home() {
     } else if (cmd === "help") {
       setTerminalLogs((current) => [
         ...current,
-        "Commands: scan | status | entropy | skills | clear",
+        "Commands: scan | status | whoami | entropy | skills | clear",
       ]);
     } else {
       setTerminalLogs((current) => [
@@ -679,6 +726,17 @@ export default function Home() {
           </nav>
 
           <div className="flex items-center gap-3">
+            {/* ZİYARETÇİ CANLI IP ROZETİ (HAREKETLİ & ŞIK) */}
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.05] font-mono text-[10px] text-zinc-300 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+              <Globe2 className="size-3 text-emerald-400 animate-pulse" />
+              <span>
+                IP: <b className="text-emerald-300">{clientIp}</b>{" "}
+                {clientLocation && (
+                  <span className="text-zinc-400">({clientLocation})</span>
+                )}
+              </span>
+            </div>
+
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/[0.07] bg-white/[0.02] font-mono text-[10px] text-zinc-400">
               <Clock
                 className="size-3 text-emerald-400 animate-spin"
@@ -792,7 +850,7 @@ export default function Home() {
               </a>
             </div>
 
-            {/* Savunma Metrikleri Çubuğu */}
+            {/* Metrik Rozetleri */}
             <div className="mt-9 grid max-w-2xl grid-cols-2 gap-px overflow-hidden rounded-2xl border border-white/[0.07] bg-white/[0.07] sm:grid-cols-4">
               {[
                 ["01", tr ? "Endpoint EDR" : "Endpoint EDR"],
@@ -867,7 +925,7 @@ export default function Home() {
                   <div className="rounded-2xl border border-white/[0.07] bg-black/20 p-4">
                     <div className="mb-4 flex items-center justify-between">
                       <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-zinc-500">
-                        Telemetry Activity
+                        Inbound Ping / Signal
                       </span>
                       <Zap className="size-3.5 text-amber-300" />
                     </div>
@@ -926,7 +984,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* YENİ ŞAŞAALI SOC TERMİNALİ + ADIM AKIŞI + ANLAŞILIR AÇIKLAMA KARTI */}
+        {/* ŞAŞAALI SOC TERMİNALİ + ADIM AKIŞI + ANLAŞILIR AÇIKLAMA KARTI */}
         <section id="soc-terminal" className="scroll-mt-24 space-y-6">
           <SectionLabel
             eyebrow="02 / SOC Incident Response Simulator"
@@ -1016,7 +1074,7 @@ export default function Home() {
                 <div className="flex items-center gap-2">
                   <TerminalIcon className="size-4 text-emerald-300" />
                   <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-300">
-                    dagsec_terminal_v4.2
+                    dagsec_terminal_v4.3
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -1036,6 +1094,7 @@ export default function Home() {
                     /terminated|HIGH|CONTAINED|threat|neutralized/i.test(log);
                   const isPrompt = log.startsWith(">");
                   const isSysmon = log.includes("[SYSMON");
+                  const isIntercept = log.includes("[INTERCEPT]");
                   return (
                     <div
                       key={`${log}-${index}`}
@@ -1045,9 +1104,11 @@ export default function Home() {
                           ? "text-rose-300 font-semibold bg-rose-950/20 px-2 py-0.5 rounded border border-rose-900/30"
                           : isPrompt
                             ? "text-emerald-300 font-bold"
-                            : isSysmon
-                              ? "text-sky-300"
-                              : "text-zinc-400",
+                            : isIntercept
+                              ? "text-amber-300 bg-amber-950/20 px-2 py-0.5 rounded border border-amber-900/30"
+                              : isSysmon
+                                ? "text-sky-300"
+                                : "text-zinc-400",
                       )}
                     >
                       {log}
@@ -1062,7 +1123,7 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Hızlı Komut Butonları (Yazmaya Gerek Bırakmayan Çipler) */}
+              {/* Hızlı Komut Butonları */}
               <div className="px-6 py-3 border-t border-white/[0.06] bg-black/20 flex flex-wrap items-center gap-2">
                 <span className="text-[10px] font-mono text-zinc-500 mr-2">
                   Hızlı Komut:
@@ -1072,6 +1133,12 @@ export default function Home() {
                   className="px-3 py-1 rounded-lg border border-emerald-400/30 bg-emerald-400/[0.06] hover:bg-emerald-400/[0.15] text-emerald-300 font-mono text-[10px] transition cursor-pointer flex items-center gap-1"
                 >
                   <Play className="size-2.5 fill-current" /> scan
+                </button>
+                <button
+                  onClick={() => executeCommand("whoami")}
+                  className="px-3 py-1 rounded-lg border border-amber-400/30 bg-amber-400/[0.06] hover:bg-amber-400/[0.15] text-amber-300 font-mono text-[10px] transition cursor-pointer"
+                >
+                  whoami (ip)
                 </button>
                 <button
                   onClick={() => executeCommand("status")}
@@ -1113,8 +1180,8 @@ export default function Home() {
                   className="min-w-0 flex-1 bg-transparent py-4 pr-4 font-mono text-[11px] text-zinc-100 outline-hidden placeholder:text-zinc-700"
                   placeholder={
                     tr
-                      ? "Komut girin ('scan', 'status', 'entropy')..."
-                      : "Enter directive ('scan', 'status')..."
+                      ? "Komut girin ('scan', 'whoami', 'status')..."
+                      : "Enter directive ('scan', 'whoami')..."
                   }
                 />
               </form>
@@ -1322,7 +1389,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* YENİ İNTERAKTİF ENTROPİ & DOSYA SANDBOX (LABORATUVAR) */}
+        {/* İNTERAKTİF ENTROPİ & DOSYA SANDBOX */}
         <section id="sandbox" className="scroll-mt-28 space-y-6">
           <SectionLabel
             eyebrow="04 / Interactive File Sandbox"
@@ -1386,7 +1453,7 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* İmza & Güvenilirlik */}
+              {/* İmza Doğrulama */}
               <div className="p-5 rounded-2xl border border-white/[0.06] bg-black/30 space-y-2">
                 <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider">
                   Dijital İmza Doğrulama
