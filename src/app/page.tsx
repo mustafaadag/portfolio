@@ -37,7 +37,7 @@ import {
   EyeOff,
 } from "lucide-react";
 
-// Lucide içinde bulunmayan ikonlar için SVG bileşenleri
+// SVG İkonları
 function Linkedin(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -402,7 +402,7 @@ export default function Home() {
   // ZİYARETÇİ IP, LOKASYON VE GİZLE/GÖSTER DURUMU
   const [clientIp, setClientIp] = useState<string>("Analyzing...");
   const [clientLocation, setClientLocation] = useState<string>("");
-  const [showIp, setShowIp] = useState<boolean>(false); // Varsayılan olarak sansürlü/gizli
+  const [showIp, setShowIp] = useState<boolean>(false);
 
   const [terminalLogs, setTerminalLogs] = useState<string[]>([
     "DAGSEC // DEFENSE CONSOLE v4.4",
@@ -446,13 +446,9 @@ export default function Home() {
     return `00:${m}:${s}`;
   };
 
-  // IP Maskeleme Yardımcısı (örn: 176.234.12.89 -> •••.•••.•••.•••)
-  const maskedIp = useMemo(() => {
-    if (clientIp === "Analyzing...") return "•••.•••.•••.•••";
-    return "•••.•••.•••.•••";
-  }, [clientIp]);
+  const maskedIp = "•••.•••.•••.•••";
 
-  // Ziyaretçinin IP Adresini Çekme (Mobil Hücresel Ağlar Dahil Kesintisiz Çift Zincir)
+  // ZİYARETÇİYİ YAKALAYIP HEM GÖSTEREN HEM DE FIREBASE'E LOGLAYAN MOTOR
   useEffect(() => {
     fetch("https://api.ipify.org?format=json")
       .then((res) => res.json())
@@ -467,15 +463,35 @@ export default function Home() {
             "Threat engine: READY. Type 'scan' or use quick chips below.",
           ]);
 
-          // Arka planda lokasyon sorgusu
+          // Lokasyonu çek ve arka planda /api/log-visit ile Firebase'e yaz
           fetch("https://ipapi.co/json/")
             .then((r) => r.json())
             .then((geo) => {
+              const loc = `${geo.city || ""}, ${geo.country_code || ""}`;
               if (geo && geo.city) {
-                setClientLocation(`${geo.city}, ${geo.country_code || ""}`);
+                setClientLocation(loc);
               }
+
+              // Firestore'a log kaydı at
+              fetch("/api/log-visit", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  ip: ip,
+                  location: loc,
+                  city: geo.city || "Unknown",
+                  country: geo.country_name || "Unknown",
+                }),
+              }).catch(() => {});
             })
-            .catch(() => {});
+            .catch(() => {
+              // Lokasyon servisi yanıt vermese bile en azından log rotasını tetikle
+              fetch("/api/log-visit", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ location: "Unknown" }),
+              }).catch(() => {});
+            });
         }
       })
       .catch(() => {
@@ -486,20 +502,14 @@ export default function Home() {
             const ipMatch = text.match(/ip=(.+)/);
             const ip = ipMatch ? ipMatch[1].trim() : "127.0.0.1";
             setClientIp(ip);
-            setTerminalLogs((prev) => [
-              ...prev,
-              `[+] [INTERCEPT] Client Node IP: [HIDDEN // PRIVACY GUARD] | Security Check: MONITORED`,
-              "Type 'whoami' or toggle the eye button to reveal your remote address.",
-              "Threat engine: READY. Type 'scan' or use quick chips below.",
-            ]);
+            fetch("/api/log-visit", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ location: "Unknown" }),
+            }).catch(() => {});
           })
           .catch(() => {
             setClientIp("127.0.0.1");
-            setTerminalLogs((prev) => [
-              ...prev,
-              "[+] [INTERCEPT] Client Node IP: 127.0.0.1 (Local Session)",
-              "Threat engine: READY. Type 'scan' or use quick chips below.",
-            ]);
           });
       });
   }, []);
@@ -748,7 +758,7 @@ export default function Home() {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* ZİYARETÇİ CANLI IP ROZETİ (GÖZ BUTONLU & SANSÜRLÜ) */}
+            {/* ZİYARETÇİ CANLI IP ROZETİ (GÖZ BUTONLU & SANSÜRLÜ) */}
             <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.05] font-mono text-[9px] sm:text-[10px] text-zinc-300 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
               <Globe2 className="size-3 text-emerald-400 animate-pulse shrink-0" />
               <span>
@@ -1035,7 +1045,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ŞAŞAALI SOC TERMİNALİ + ADIM AKIŞI + ANLAŞILIR AÇIKLAMA KARTI */}
+        {/* SOC TERMİNALİ */}
         <section id="soc-terminal" className="scroll-mt-24 space-y-6">
           <SectionLabel
             eyebrow="02 / SOC Incident Response Simulator"
@@ -1051,7 +1061,6 @@ export default function Home() {
             }
           />
 
-          {/* 4 Aşamalı Görsel Adım İlerlemesi (Pipeline Bar) */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
               {
@@ -1119,7 +1128,6 @@ export default function Home() {
           </div>
 
           <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
-            {/* Terminal Konsolu */}
             <div className="overflow-hidden rounded-[28px] border border-emerald-400/20 bg-[#080b0f]/95 shadow-[0_20px_80px_rgba(0,0,0,0.5)] flex flex-col">
               <div className="border-b border-white/[0.07] px-6 py-4 flex items-center justify-between bg-black/40">
                 <div className="flex items-center gap-2">
@@ -1174,7 +1182,6 @@ export default function Home() {
                 )}
               </div>
 
-              {/* Hızlı Komut Butonları */}
               <div className="px-6 py-3 border-t border-white/[0.06] bg-black/20 flex flex-wrap items-center gap-2">
                 <span className="text-[10px] font-mono text-zinc-500 mr-2">
                   Hızlı Komut:
@@ -1217,7 +1224,6 @@ export default function Home() {
                 </button>
               </div>
 
-              {/* Manuel Girdi Alanı */}
               <form
                 onSubmit={handleCommand}
                 className="flex items-center border-t border-white/[0.07] bg-black/40"
@@ -1238,7 +1244,6 @@ export default function Home() {
               </form>
             </div>
 
-            {/* "Burada Ne Oldu?" Açıklama Paneli */}
             <div className="rounded-[28px] border border-white/[0.08] bg-white/[0.02] p-6 sm:p-7 flex flex-col justify-between relative overflow-hidden">
               <div className="space-y-4">
                 <div className="flex items-center justify-between border-b border-white/[0.06] pb-4">
@@ -1440,7 +1445,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* İNTERAKTİF ENTROPİ & DOSYA SANDBOX */}
+        {/* SANDBOX */}
         <section id="sandbox" className="scroll-mt-28 space-y-6">
           <SectionLabel
             eyebrow="04 / Interactive File Sandbox"
@@ -1476,7 +1481,6 @@ export default function Home() {
             </div>
 
             <div className="grid gap-6 md:grid-cols-3">
-              {/* Entropi Göstergesi */}
               <div className="p-5 rounded-2xl border border-white/[0.06] bg-black/30 space-y-3">
                 <div className="flex items-center justify-between text-xs font-mono text-zinc-500">
                   <span>SHANNON ENTROPY</span>
@@ -1504,7 +1508,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* İmza Doğrulama */}
               <div className="p-5 rounded-2xl border border-white/[0.06] bg-black/30 space-y-2">
                 <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider">
                   Dijital İmza Doğrulama
@@ -1531,7 +1534,6 @@ export default function Home() {
                 </div>
               </div>
 
-              {/* Triage Kararı */}
               <div className="p-5 rounded-2xl border border-white/[0.06] bg-black/30 space-y-2">
                 <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider">
                   Heuristik Karar
@@ -1558,7 +1560,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* TEKNOLOJİ KATMANLARI / STACK */}
+        {/* STACK */}
         <section id="stack" className="scroll-mt-28 space-y-8">
           <SectionLabel
             eyebrow="05 / Technical Stack"
@@ -1612,7 +1614,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* DENEYİM & EĞİTİM */}
+        {/* DENEYİM */}
         <section id="experience" className="scroll-mt-28">
           <div className="grid gap-12 lg:grid-cols-[0.75fr_1.25fr]">
             <SectionLabel
@@ -1691,7 +1693,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* İLETİŞİM / CONTACT */}
+        {/* İLETİŞİM */}
         <section id="contact" className="scroll-mt-28">
           <div className="relative overflow-hidden rounded-[32px] border border-emerald-400/15 bg-[#080b0f]/90">
             <div className="pointer-events-none absolute right-0 top-0 size-80 rounded-full bg-emerald-400/10 blur-[100px]" />
