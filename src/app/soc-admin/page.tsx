@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { db } from "@/firebase";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 import {
@@ -9,12 +9,12 @@ import {
   Globe2,
   RefreshCw,
   Lock,
-  Unlock,
   Search,
   Server,
   Activity,
   ArrowLeft,
-  Filter,
+  Clock,
+  Timer,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -25,10 +25,10 @@ interface VisitorLog {
   country?: string;
   location?: string;
   userAgent?: string;
+  durationSeconds?: number;
   timestamp?: any;
 }
 
-// Güvenlik için basit PIN kodu (İstediğin gibi değiştirebilirsin)
 const ACCESS_PIN = "1322";
 
 export default function SocAdminPage() {
@@ -40,7 +40,6 @@ export default function SocAdminPage() {
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Firestore'dan son logları çekme fonksiyonu
   const fetchLogs = async () => {
     setLoading(true);
     try {
@@ -79,7 +78,6 @@ export default function SocAdminPage() {
     }
   };
 
-  // Arama & Filtreleme
   const filteredLogs = logs.filter((log) => {
     const term = searchTerm.toLowerCase();
     return (
@@ -90,10 +88,28 @@ export default function SocAdminPage() {
     );
   });
 
-  // Tekil IP Sayısı
   const uniqueIps = new Set(logs.map((l) => l.ip)).size;
 
-  // PIN GİRİŞ EKRANI (LOCKED STATE)
+  // Ortalama sitede kalma süresi
+  const avgDuration = useMemo(() => {
+    if (logs.length === 0) return 0;
+    const total = logs.reduce(
+      (acc, curr) => acc + (curr.durationSeconds || 0),
+      0,
+    );
+    return Math.round(total / logs.length);
+  }, [logs]);
+
+  // Süreyi "X dk Y sn" formatına çevirme
+  const formatDuration = (seconds?: number) => {
+    if (!seconds || seconds <= 0) return "< 5 sn";
+    if (seconds < 60) return `${seconds} sn`;
+    const mins = Math.floor(seconds / 60);
+    const remSecs = seconds % 60;
+    return `${mins} dk ${remSecs > 0 ? `${remSecs} sn` : ""}`;
+  };
+
+  // PIN GİRİŞ EKRANI
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#05070a] text-white flex items-center justify-center p-4">
@@ -155,11 +171,11 @@ export default function SocAdminPage() {
     );
   }
 
-  // YÖNETİCİ KONSOLU (AUTHENTICATED)
+  // YÖNETİCİ KONSOLU
   return (
     <div className="min-h-screen bg-[#05070a] text-white p-4 sm:p-8 font-sans">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* ÜST BAŞLIK & KONTROLLER */}
+        {/* ÜST BAŞLIK */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-6 rounded-3xl border border-white/10 bg-[#080b0f]">
           <div className="flex items-center gap-4">
             <div className="size-12 rounded-2xl border border-emerald-400/30 bg-emerald-400/10 flex items-center justify-center">
@@ -198,8 +214,8 @@ export default function SocAdminPage() {
           </div>
         </div>
 
-        {/* METRİK KARTLARI */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* METRİK KARTLARI (4 KART) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-5 rounded-2xl border border-white/10 bg-[#080b0f]">
             <div className="flex items-center justify-between font-mono text-xs text-zinc-500">
               <span>TOPLAM LOG KAYDI</span>
@@ -228,20 +244,33 @@ export default function SocAdminPage() {
 
           <div className="p-5 rounded-2xl border border-white/10 bg-[#080b0f]">
             <div className="flex items-center justify-between font-mono text-xs text-zinc-500">
+              <span>ORTALAMA OTURUM SÜRESİ</span>
+              <Timer className="size-4 text-amber-400" />
+            </div>
+            <div className="mt-2 text-3xl font-black font-mono text-amber-300">
+              {formatDuration(avgDuration)}
+            </div>
+            <p className="mt-1 text-[10px] font-mono text-zinc-500">
+              Kullanıcı başına kalış süresi
+            </p>
+          </div>
+
+          <div className="p-5 rounded-2xl border border-white/10 bg-[#080b0f]">
+            <div className="flex items-center justify-between font-mono text-xs text-zinc-500">
               <span>SİSTEM DURUMU</span>
               <Activity className="size-4 text-emerald-400" />
             </div>
             <div className="mt-2 text-xl font-bold font-mono text-emerald-400 flex items-center gap-2">
-              <span className="size-2 rounded-full bg-emerald-400" />
-              CANLI DİNLENİYOR
+              <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+              DİNLENİYOR
             </div>
             <p className="mt-1 text-[10px] font-mono text-zinc-500">
-              Firestore senkronizasyonu aktif
+              Beacon & Heartbeat aktif
             </p>
           </div>
         </div>
 
-        {/* ARAMA VE TABLO */}
+        {/* TABLO */}
         <div className="rounded-3xl border border-white/10 bg-[#080b0f] overflow-hidden">
           <div className="p-4 sm:p-5 border-b border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
             <div className="relative w-full sm:w-80">
@@ -264,6 +293,9 @@ export default function SocAdminPage() {
               <thead className="border-b border-white/10 bg-black/30 text-zinc-400">
                 <tr>
                   <th className="py-3.5 px-4 font-normal">ZAMAN</th>
+                  <th className="py-3.5 px-4 font-normal">
+                    SÜRE (SİTEDE KALIŞ)
+                  </th>
                   <th className="py-3.5 px-4 font-normal">IP ADRESİ</th>
                   <th className="py-3.5 px-4 font-normal">LOKASYON</th>
                   <th className="py-3.5 px-4 font-normal">
@@ -274,7 +306,7 @@ export default function SocAdminPage() {
               <tbody className="divide-y divide-white/5">
                 {filteredLogs.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="py-8 text-center text-zinc-500">
+                    <td colSpan={5} className="py-8 text-center text-zinc-500">
                       Hiçbir kayıt bulunamadı.
                     </td>
                   </tr>
@@ -298,6 +330,12 @@ export default function SocAdminPage() {
                       >
                         <td className="py-3 px-4 text-zinc-400 whitespace-nowrap text-[11px]">
                           {formattedDate}
+                        </td>
+                        <td className="py-3 px-4 whitespace-nowrap">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg border border-amber-400/20 bg-amber-400/10 text-amber-300 font-bold text-[11px]">
+                            <Clock className="size-3 text-amber-400" />
+                            {formatDuration(log.durationSeconds)}
+                          </span>
                         </td>
                         <td className="py-3 px-4 whitespace-nowrap">
                           <span className="px-2 py-0.5 rounded border border-emerald-500/20 bg-emerald-500/10 text-emerald-300 font-bold">
