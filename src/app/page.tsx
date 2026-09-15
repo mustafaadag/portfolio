@@ -33,9 +33,11 @@ import {
   FileCheck2,
   Clock,
   Globe2,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
-// Lucide içinde bulunmayan veya çakışan ikonlar için doğrudan SVG bileşenleri
+// Lucide içinde bulunmayan ikonlar için SVG bileşenleri
 function Linkedin(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
@@ -397,12 +399,13 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [terminalInput, setTerminalInput] = useState("");
 
-  // ZİYARETÇİ IP VE LOKASYON TESPİT DURUMU
+  // ZİYARETÇİ IP, LOKASYON VE GİZLE/GÖSTER DURUMU
   const [clientIp, setClientIp] = useState<string>("Analyzing...");
   const [clientLocation, setClientLocation] = useState<string>("");
+  const [showIp, setShowIp] = useState<boolean>(false); // Varsayılan olarak sansürlü/gizli
 
   const [terminalLogs, setTerminalLogs] = useState<string[]>([
-    "DAGSEC // DEFENSE CONSOLE v4.3",
+    "DAGSEC // DEFENSE CONSOLE v4.4",
     "Telemetry stream: ONLINE",
     "Sysmon collector: ATTACHED",
     "Scanning inbound network interface...",
@@ -443,6 +446,12 @@ export default function Home() {
     return `00:${m}:${s}`;
   };
 
+  // IP Maskeleme Yardımcısı (örn: 176.234.12.89 -> •••.•••.•••.•••)
+  const maskedIp = useMemo(() => {
+    if (clientIp === "Analyzing...") return "•••.•••.•••.•••";
+    return "•••.•••.•••.•••";
+  }, [clientIp]);
+
   // Ziyaretçinin IP Adresini Çekme (Mobil Hücresel Ağlar Dahil Kesintisiz Çift Zincir)
   useEffect(() => {
     fetch("https://api.ipify.org?format=json")
@@ -453,11 +462,12 @@ export default function Home() {
           setClientIp(ip);
           setTerminalLogs((prev) => [
             ...prev,
-            `[+] [INTERCEPT] Client Node IP: ${ip} | Security Check: MONITORED`,
+            `[+] [INTERCEPT] Client Node IP: [HIDDEN // PRIVACY GUARD] | Security Check: MONITORED`,
+            "Type 'whoami' or toggle the eye button to reveal your remote address.",
             "Threat engine: READY. Type 'scan' or use quick chips below.",
           ]);
 
-          // Arka planda lokasyon sorgusu (engellenirse sessizce devam eder)
+          // Arka planda lokasyon sorgusu
           fetch("https://ipapi.co/json/")
             .then((r) => r.json())
             .then((geo) => {
@@ -478,7 +488,8 @@ export default function Home() {
             setClientIp(ip);
             setTerminalLogs((prev) => [
               ...prev,
-              `[+] [INTERCEPT] Client Node IP: ${ip} | Security Check: MONITORED`,
+              `[+] [INTERCEPT] Client Node IP: [HIDDEN // PRIVACY GUARD] | Security Check: MONITORED`,
+              "Type 'whoami' or toggle the eye button to reveal your remote address.",
               "Threat engine: READY. Type 'scan' or use quick chips below.",
             ]);
           })
@@ -604,7 +615,7 @@ export default function Home() {
     } else if (cmd === "status") {
       setTerminalLogs((current) => [
         ...current,
-        `Engine: ONLINE | Telemetry: LIVE | Inbound Client: ${clientIp} | Status: ARMED`,
+        `Engine: ONLINE | Telemetry: LIVE | Inbound Client: ${showIp ? clientIp : maskedIp} | Status: ARMED`,
       ]);
     } else if (cmd === "skills") {
       setTerminalLogs((current) => [
@@ -617,9 +628,10 @@ export default function Home() {
         "Entropy Engine: Shannon section calculator active. Critical threshold: > 7.00.",
       ]);
     } else if (cmd === "whoami" || cmd === "myip") {
+      setShowIp(true);
       setTerminalLogs((current) => [
         ...current,
-        `Remote Node: ${clientIp} | Geo: ${clientLocation || "Unknown"} | Traffic: Monitored`,
+        `Remote Node IP: ${clientIp} | Geo: ${clientLocation || "Unknown"} | Traffic: Monitored [UNMASKED]`,
       ]);
     } else if (cmd === "clear") {
       setTerminalLogs([]);
@@ -704,7 +716,7 @@ export default function Home() {
 
       {/* HEADER & NAV */}
       <header className="sticky top-0 z-50 border-b border-white/[0.07] bg-[#05070a]/80 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-8 py-3.5 sm:py-4">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-8 py-3 sm:py-4">
           <a href="#home" className="flex items-center gap-2.5 sm:gap-3">
             <div className="relative grid size-8 sm:size-9 place-items-center rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06]">
               <Shield className="size-3.5 sm:size-4 text-emerald-300" />
@@ -736,19 +748,35 @@ export default function Home() {
           </nav>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            {/* ZİYARETÇİ CANLI IP ROZETİ (MOBİL VE MASAÜSTÜNDE HER ZAMAN GÖRÜNÜR) */}
+            {/* ZİYARETÇİ CANLI IP ROZETİ (GÖZ BUTONLU & SANSÜRLÜ) */}
             <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.05] font-mono text-[9px] sm:text-[10px] text-zinc-300 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
               <Globe2 className="size-3 text-emerald-400 animate-pulse shrink-0" />
               <span>
                 <span className="text-zinc-500 hidden xs:inline">IP: </span>
-                <b className="text-emerald-300">{clientIp}</b>
-                {clientLocation && (
+                <b className="text-emerald-300 tracking-wider">
+                  {showIp ? clientIp : maskedIp}
+                </b>
+                {showIp && clientLocation && (
                   <span className="text-zinc-400 hidden lg:inline">
                     {" "}
                     ({clientLocation})
                   </span>
                 )}
               </span>
+
+              {/* GÖZ / SHOW BUTONU */}
+              <button
+                onClick={() => setShowIp((prev) => !prev)}
+                className="p-1 -mr-1 rounded-md text-zinc-400 hover:text-emerald-300 hover:bg-emerald-400/10 transition cursor-pointer"
+                title={showIp ? "IP Adresini Gizle" : "IP Adresini Göster"}
+                aria-label="Toggle IP Visibility"
+              >
+                {showIp ? (
+                  <EyeOff className="size-3 text-emerald-400" />
+                ) : (
+                  <Eye className="size-3 text-zinc-400" />
+                )}
+              </button>
             </div>
 
             <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-white/[0.07] bg-white/[0.02] font-mono text-[10px] text-zinc-400">
@@ -1097,7 +1125,7 @@ export default function Home() {
                 <div className="flex items-center gap-2">
                   <TerminalIcon className="size-4 text-emerald-300" />
                   <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-zinc-300">
-                    dagsec_terminal_v4.3
+                    dagsec_terminal_v4.4
                   </span>
                 </div>
                 <div className="flex items-center gap-3">
