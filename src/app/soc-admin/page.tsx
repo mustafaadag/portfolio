@@ -2,10 +2,9 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { db } from "@/firebase";
-import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 import {
   ShieldAlert,
-  Terminal,
   Globe2,
   RefreshCw,
   Lock,
@@ -29,7 +28,7 @@ interface VisitorLog {
   timestamp?: any;
 }
 
-const ACCESS_PIN = "1322";
+const ACCESS_PIN = "1337";
 
 export default function SocAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -42,20 +41,29 @@ export default function SocAdminPage() {
 
   const fetchLogs = async () => {
     setLoading(true);
+    setErrorMsg("");
     try {
-      const q = query(
-        collection(db, "visitor_logs"),
-        orderBy("timestamp", "desc"),
-        limit(50),
-      );
-      const querySnapshot = await getDocs(q);
+      const querySnapshot = await getDocs(collection(db, "visitor_logs"));
       const fetched: VisitorLog[] = [];
+
       querySnapshot.forEach((doc) => {
         fetched.push({ id: doc.id, ...doc.data() } as VisitorLog);
       });
+
+      fetched.sort((a, b) => {
+        const timeA =
+          a.timestamp?.seconds ||
+          (a.timestamp?.toDate ? a.timestamp.toDate().getTime() / 1000 : 0);
+        const timeB =
+          b.timestamp?.seconds ||
+          (b.timestamp?.toDate ? b.timestamp.toDate().getTime() / 1000 : 0);
+        return timeB - timeA;
+      });
+
       setLogs(fetched);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Log fetch hatası:", err);
+      setErrorMsg(`Veri çekme hatası: ${err.message || err}`);
     } finally {
       setLoading(false);
     }
@@ -90,7 +98,6 @@ export default function SocAdminPage() {
 
   const uniqueIps = new Set(logs.map((l) => l.ip)).size;
 
-  // Ortalama sitede kalma süresi
   const avgDuration = useMemo(() => {
     if (logs.length === 0) return 0;
     const total = logs.reduce(
@@ -100,16 +107,15 @@ export default function SocAdminPage() {
     return Math.round(total / logs.length);
   }, [logs]);
 
-  // Süreyi "X dk Y sn" formatına çevirme
+  // Net süre gösterici: Kesin dakika ve saniye
   const formatDuration = (seconds?: number) => {
-    if (!seconds || seconds <= 0) return "< 5 sn";
-    if (seconds < 60) return `${seconds} sn`;
-    const mins = Math.floor(seconds / 60);
-    const remSecs = seconds % 60;
-    return `${mins} dk ${remSecs > 0 ? `${remSecs} sn` : ""}`;
+    const s = Math.max(0, Math.floor(seconds || 0));
+    if (s < 60) return `${s} sn`;
+    const mins = Math.floor(s / 60);
+    const remSecs = s % 60;
+    return remSecs > 0 ? `${mins} dk ${remSecs} sn` : `${mins} dk`;
   };
 
-  // PIN GİRİŞ EKRANI
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-[#05070a] text-white flex items-center justify-center p-4">
@@ -171,7 +177,6 @@ export default function SocAdminPage() {
     );
   }
 
-  // YÖNETİCİ KONSOLU
   return (
     <div className="min-h-screen bg-[#05070a] text-white p-4 sm:p-8 font-sans">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -214,7 +219,7 @@ export default function SocAdminPage() {
           </div>
         </div>
 
-        {/* METRİK KARTLARI (4 KART) */}
+        {/* METRİK KARTLARI */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="p-5 rounded-2xl border border-white/10 bg-[#080b0f]">
             <div className="flex items-center justify-between font-mono text-xs text-zinc-500">
@@ -225,7 +230,7 @@ export default function SocAdminPage() {
               {logs.length}
             </div>
             <p className="mt-1 text-[10px] font-mono text-zinc-500">
-              Son 50 işlem listeleniyor
+              Kayıtlı oturum sayısı
             </p>
           </div>
 
