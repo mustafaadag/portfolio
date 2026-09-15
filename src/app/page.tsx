@@ -3,7 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Activity,
+  ArrowDown,
   ArrowUpRight,
+  Briefcase,
   Check,
   CheckCircle2,
   ChevronRight,
@@ -14,18 +16,24 @@ import {
   ExternalLink,
   FileCode2,
   Fingerprint,
+  Github,
+  GraduationCap,
   Layers3,
   Linkedin,
   Lock,
   Mail,
   Menu,
+  Network,
   Play,
   Radio,
+  Radar,
   RefreshCw,
   Search,
   Send,
+  Server,
   Shield,
   ShieldAlert,
+  Sparkles,
   Terminal as TerminalIcon,
   X,
   Zap,
@@ -621,7 +629,7 @@ export default function Home() {
               <div className="relative p-5 sm:p-6">
                 <div className="flex items-center justify-between border-b border-white/[0.07] pb-4">
                   <div className="flex items-center gap-2">
-                    <Radio className="size-4 text-emerald-300" />
+                    <Radar className="size-4 text-emerald-300" />
                     <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-zinc-300">
                       DAGSEC / SOC NODE
                     </span>
@@ -986,7 +994,11 @@ export default function Home() {
                   value={terminalInput}
                   onChange={(event) => setTerminalInput(event.target.value)}
                   className="min-w-0 flex-1 bg-transparent py-4 pr-4 font-mono text-[11px] text-zinc-100 outline-none placeholder:text-zinc-700"
-                  placeholder="scan | status | skills | help"
+                  placeholder={
+                    tr
+                      ? "scan | status | skills | help"
+                      : "scan | status | skills | help"
+                  }
                 />
               </form>
             </div>
