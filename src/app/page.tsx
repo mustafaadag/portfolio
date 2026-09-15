@@ -443,28 +443,38 @@ export default function Home() {
     return `00:${m}:${s}`;
   };
 
-  // Ziyaretçinin IP Adresini ve Konumunu Çek
+  // Ziyaretçinin IP Adresini Çekme (Mobil Hücresel Ağlar Dahil Kesintisiz Çift Zincir)
   useEffect(() => {
-    fetch("https://ipapi.co/json/")
+    fetch("https://api.ipify.org?format=json")
       .then((res) => res.json())
       .then((data) => {
         if (data && data.ip) {
           const ip = data.ip;
-          const loc = `${data.city || ""}, ${data.country_code || ""}`;
           setClientIp(ip);
-          setClientLocation(loc);
           setTerminalLogs((prev) => [
             ...prev,
-            `[+] [INTERCEPT] Client Node IP: ${ip} | Location: ${loc || "Active"} | Security Check: MONITORED`,
+            `[+] [INTERCEPT] Client Node IP: ${ip} | Security Check: MONITORED`,
             "Threat engine: READY. Type 'scan' or use quick chips below.",
           ]);
+
+          // Arka planda lokasyon sorgusu (engellenirse sessizce devam eder)
+          fetch("https://ipapi.co/json/")
+            .then((r) => r.json())
+            .then((geo) => {
+              if (geo && geo.city) {
+                setClientLocation(`${geo.city}, ${geo.country_code || ""}`);
+              }
+            })
+            .catch(() => {});
         }
       })
       .catch(() => {
-        fetch("https://api.ipify.org?format=json")
-          .then((res) => res.json())
-          .then((d) => {
-            const ip = d.ip || "127.0.0.1";
+        // Yedek Servis: Cloudflare Trace
+        fetch("https://1.1.1.1/cdn-cgi/trace")
+          .then((res) => res.text())
+          .then((text) => {
+            const ipMatch = text.match(/ip=(.+)/);
+            const ip = ipMatch ? ipMatch[1].trim() : "127.0.0.1";
             setClientIp(ip);
             setTerminalLogs((prev) => [
               ...prev,
@@ -694,17 +704,17 @@ export default function Home() {
 
       {/* HEADER & NAV */}
       <header className="sticky top-0 z-50 border-b border-white/[0.07] bg-[#05070a]/80 backdrop-blur-2xl">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-          <a href="#home" className="flex items-center gap-3">
-            <div className="relative grid size-9 place-items-center rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06]">
-              <Shield className="size-4 text-emerald-300" />
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 sm:px-8 py-3.5 sm:py-4">
+          <a href="#home" className="flex items-center gap-2.5 sm:gap-3">
+            <div className="relative grid size-8 sm:size-9 place-items-center rounded-xl border border-emerald-400/20 bg-emerald-400/[0.06]">
+              <Shield className="size-3.5 sm:size-4 text-emerald-300" />
               <span className="absolute -right-0.5 -top-0.5 size-1.5 rounded-full bg-emerald-300 shadow-[0_0_10px_#6ee7b7]" />
             </div>
             <div>
-              <div className="font-mono text-xs font-bold tracking-[0.22em] text-zinc-100">
+              <div className="font-mono text-[11px] sm:text-xs font-bold tracking-[0.22em] text-zinc-100">
                 DAGSEC
               </div>
-              <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-zinc-500">
+              <div className="font-mono text-[8px] sm:text-[9px] uppercase tracking-[0.2em] text-zinc-500 hidden xs:block">
                 security engineering
               </div>
             </div>
@@ -725,14 +735,18 @@ export default function Home() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-3">
-            {/* ZİYARETÇİ CANLI IP ROZETİ (HAREKETLİ & ŞIK) */}
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.05] font-mono text-[10px] text-zinc-300 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
-              <Globe2 className="size-3 text-emerald-400 animate-pulse" />
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* ZİYARETÇİ CANLI IP ROZETİ (MOBİL VE MASAÜSTÜNDE HER ZAMAN GÖRÜNÜR) */}
+            <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-emerald-500/20 bg-emerald-500/[0.05] font-mono text-[9px] sm:text-[10px] text-zinc-300 shadow-[0_0_15px_rgba(16,185,129,0.1)]">
+              <Globe2 className="size-3 text-emerald-400 animate-pulse shrink-0" />
               <span>
-                IP: <b className="text-emerald-300">{clientIp}</b>{" "}
+                <span className="text-zinc-500 hidden xs:inline">IP: </span>
+                <b className="text-emerald-300">{clientIp}</b>
                 {clientLocation && (
-                  <span className="text-zinc-400">({clientLocation})</span>
+                  <span className="text-zinc-400 hidden lg:inline">
+                    {" "}
+                    ({clientLocation})
+                  </span>
                 )}
               </span>
             </div>
@@ -758,7 +772,7 @@ export default function Home() {
 
             <button
               onClick={() => setMenuOpen((value) => !value)}
-              className="grid size-10 place-items-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-zinc-300 md:hidden"
+              className="grid size-9 sm:size-10 place-items-center rounded-xl border border-white/[0.08] bg-white/[0.03] text-zinc-300 md:hidden cursor-pointer"
             >
               {menuOpen ? (
                 <X className="size-4" />
@@ -786,6 +800,15 @@ export default function Home() {
                   <ChevronRight className="size-4" />
                 </a>
               ))}
+              <div className="pt-4 flex items-center justify-between font-mono text-xs text-zinc-400">
+                <span>Dil / Language</span>
+                <button
+                  onClick={() => setLang((v) => (v === "tr" ? "en" : "tr"))}
+                  className="px-3 py-1 rounded-lg border border-white/[0.08] bg-white/[0.04] text-emerald-300"
+                >
+                  {tr ? "Switch to English" : "Türkçe'ye Geç"}
+                </button>
+              </div>
             </div>
           </div>
         )}
