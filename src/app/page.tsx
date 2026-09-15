@@ -1,22 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   Shield,
-  Terminal,
+  Terminal as TerminalIcon,
   Cpu,
   Briefcase,
   GraduationCap,
   Languages,
   LineChart,
   ExternalLink,
-  ArrowUpRight,
   Mail,
-  Layers,
   Activity,
   Send,
   Sparkles,
   CheckCircle2,
+  AlertTriangle,
+  Play,
+  Server,
+  Radio,
+  Lock,
 } from "lucide-react";
 
 function GithubIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -58,164 +61,265 @@ function LinkedinIcon(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
+// ARKA PLAN İÇİN ETKİLEŞİMLİ PARÇACIK RADAR AĞI
+function CyberRadarBackground() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animationFrameId: number;
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    const particles: Array<{
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      radius: number;
+    }> = [];
+    const particleCount = Math.min(Math.floor(window.innerWidth / 16), 70);
+
+    for (let i = 0; i < particleCount; i++) {
+      particles.push({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: (Math.random() - 0.5) * 0.4,
+        radius: Math.random() * 1.5 + 0.5,
+      });
+    }
+
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    };
+    window.addEventListener("resize", handleResize);
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      // Parçacıkları çiz ve bağla
+      for (let i = 0; i < particles.length; i++) {
+        const p1 = particles[i];
+        p1.x += p1.vx;
+        p1.y += p1.vy;
+
+        if (p1.x < 0 || p1.x > width) p1.vx *= -1;
+        if (p1.y < 0 || p1.y > height) p1.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(p1.x, p1.y, p1.radius, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(16, 185, 129, 0.5)";
+        ctx.fill();
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dx = p1.x - p2.x;
+          const dy = p1.y - p2.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 130) {
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `rgba(16, 185, 129, ${0.18 * (1 - dist / 130)})`;
+            ctx.lineWidth = 0.8;
+            ctx.stroke();
+          }
+        }
+      }
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, []);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 pointer-events-none z-0 opacity-60"
+    />
+  );
+}
+
 export default function Home() {
   const [lang, setLang] = useState<"tr" | "en">("tr");
 
-  const toggleLanguage = () => {
-    setLang((prev) => (prev === "tr" ? "en" : "tr"));
+  // Terminal & Tehdit Simülasyon Durumu
+  const [terminalLogs, setTerminalLogs] = useState<string[]>([
+    "DagSec Threat Response CLI v3.8 ready.",
+    "System status: TELEMETRY_ONLINE | Sysmon Kernel Hook: ATTACHED",
+    "Type 'scan' or press the button below to initiate simulated containment.",
+  ]);
+  const [terminalInput, setTerminalInput] = useState("");
+  const [isSimulating, setIsSimulating] = useState(false);
+  const terminalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (terminalRef.current) {
+      terminalRef.current.scrollTop = terminalRef.current.scrollHeight;
+    }
+  }, [terminalLogs]);
+
+  const runSimulation = () => {
+    if (isSimulating) return;
+    setIsSimulating(true);
+    const logs = [
+      "[*] [EVENT INTERCEPT] Process spawn: svch0st.exe [PID: 5812] by cmd.exe",
+      "[*] [SYSMON TRACE] Event ID 1: Suspicious parent-child relationship verified.",
+      "[*] [HEURISTIC SCAN] PE Section Entropy: 7.91 (Packed / Encrypted payload detected)",
+      "[*] [LOCAL CACHE] Querying SQLite Hash DB: MISS -> Escalating to VirusTotal API...",
+      "[!] [ALERT] 48/71 Detection Engines Flagged: Trojan.Generic.EDR_Evasion",
+      "[✓] [REMEDIATION] Process 5812 terminated. Memory dumped. Zero-day hash blacklisted.",
+    ];
+
+    logs.forEach((log, idx) => {
+      setTimeout(
+        () => {
+          setTerminalLogs((prev) => [...prev, log]);
+          if (idx === logs.length - 1) setIsSimulating(false);
+        },
+        (idx + 1) * 650,
+      );
+    });
   };
 
-  const content = {
-    tr: {
-      badge: "Siber Güvenlik & Sistem Mühendisliği",
-      heroTitle: "Mustafa Dağ",
-      heroRole: "Endpoint Security Engineer & Software Developer",
-      heroDesc:
-        "Uç nokta tespiti (EDR), Windows Internals, Sysmon telemetri modelleme ve C# tabanlı yüksek performanslı siber savunma sistemleri geliştiriyorum.",
-      stats: [
-        { value: "EDR & SOC", label: "Uzmanlık Alanı" },
-        { value: "C# / .NET", label: "Çekirdek Dil" },
-        { value: "Bursa / Nilüfer", label: "Lokasyon" },
-      ],
-      ctaContact: "İletişime Geç",
-      ctaProjects: "Projeleri İncele",
-      aboutTitle: "Hakkımda",
-      aboutSubtitle: "Mühendislik Vizyonu",
-      aboutText:
-        "Karabük Üniversitesi Bilgisayar Mühendisliği mezunuyum. Siber güvenlik odağında; Windows iç mimarisi (Windows Internals), Sysmon telemetrisi üzerinden şüpheli süreçlerin yakalanması, PE başlıkları üzerinde Shannon entropi analizi ve otonom tehdit müdahale mekanizmaları tasarlıyorum. Yazılım geliştirme pratiğimi modern uç nokta güvenliği ve telemetri boru hatlarıyla harmanlıyorum.",
-      projectsTitle: "Öne Çıkan Çalışmalar",
-      projectsSubtitle: "Bento Portfolyo",
-      experienceTitle: "Kariyer & Eğitim",
-      experienceSubtitle: "Zaman Çizelgesi",
-      skillsTitle: "Yetkinlik Matrisi",
-      skillsSubtitle: "Kullandığım Teknolojiler",
-      contactTitle: "Bir Fikrin mi Var?",
-      contactSubtitle: "Doğrudan İletişim",
-      contactDesc:
-        "Siber güvenlik mimarileri, sistem mühendisliği veya yazılım iş birlikleri için bana doğrudan ulaşabilirsiniz.",
-    },
-    en: {
-      badge: "Cybersecurity & Systems Engineering",
-      heroTitle: "Mustafa Dağ",
-      heroRole: "Endpoint Security Engineer & Software Developer",
-      heroDesc:
-        "Architecting Endpoint Detection & Response (EDR) agents, Windows Internals telemetry pipelines, and resilient C# cyber defense engines.",
-      stats: [
-        { value: "EDR & SOC", label: "Core Specialty" },
-        { value: "C# / .NET", label: "Primary Stack" },
-        { value: "Bursa / TR", label: "Location" },
-      ],
-      ctaContact: "Get in Touch",
-      ctaProjects: "Explore Works",
-      aboutTitle: "About Me",
-      aboutSubtitle: "Engineering Vision",
-      aboutText:
-        "Computer Engineering graduate from Karabük University. Specialized in Windows Internals, real-time Sysmon event auditing, Shannon entropy calculations across PE binaries, and automated threat mitigation pipelines. Merging disciplined systems development with proactive defensive telemetry.",
-      projectsTitle: "Selected Works",
-      projectsSubtitle: "Bento Showcase",
-      experienceTitle: "Career & Credentials",
-      experienceSubtitle: "Timeline",
-      skillsTitle: "Core Proficiencies",
-      skillsSubtitle: "Tech Stack",
-      contactTitle: "Have a Project in Mind?",
-      contactSubtitle: "Direct Channel",
-      contactDesc:
-        "Available for cybersecurity architectures, systems programming, and high-performance software collaborations.",
-    },
-  };
+  const handleCommand = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cmd = terminalInput.trim().toLowerCase();
+    if (!cmd) return;
 
-  const t = content[lang];
+    if (cmd === "scan") {
+      runSimulation();
+    } else if (cmd === "help") {
+      setTerminalLogs((p) => [
+        ...p,
+        `> ${terminalInput}`,
+        "Commands: 'scan', 'status', 'skills', 'clear'",
+      ]);
+    } else if (cmd === "status") {
+      setTerminalLogs((p) => [
+        ...p,
+        `> ${terminalInput}`,
+        "EDR Engine: RUNNING | Threat Level: NOMINAL | Latency: 4ms",
+      ]);
+    } else if (cmd === "skills") {
+      setTerminalLogs((p) => [
+        ...p,
+        `> ${terminalInput}`,
+        "C#, .NET, Sysmon, Windows Internals, Python, Flutter, SQLite",
+      ]);
+    } else if (cmd === "clear") {
+      setTerminalLogs([]);
+    } else {
+      setTerminalLogs((p) => [
+        ...p,
+        `> ${terminalInput}`,
+        `Unknown directive '${cmd}'. Try 'help'`,
+      ]);
+    }
+    setTerminalInput("");
+  };
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-neutral-100 font-sans selection:bg-neutral-800 selection:text-white antialiased relative">
-      {/* İnce Minimalist Izgara Arka Planı (Subtle Ambient Glow) */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-emerald-500/10 blur-[140px] rounded-full pointer-events-none" />
+    <div className="min-h-screen bg-[#050508] text-neutral-100 font-sans selection:bg-emerald-500/30 selection:text-emerald-300 relative overflow-x-hidden">
+      {/* ŞAŞAALI CANVAS VE IŞIK ATMOSFERİ */}
+      <CyberRadarBackground />
+      <div className="fixed top-[-10%] left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-emerald-500/10 blur-[160px] rounded-full pointer-events-none z-0" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[600px] h-[500px] bg-sky-500/10 blur-[180px] rounded-full pointer-events-none z-0" />
 
-      {/* NAVİGASYON */}
-      <nav className="fixed top-6 left-1/2 -translate-x-1/2 z-50 flex items-center justify-between w-[92%] max-w-5xl px-6 py-3.5 rounded-full border border-neutral-800/80 bg-neutral-950/70 backdrop-blur-xl shadow-2xl">
-        <a
-          href="#"
-          className="text-sm font-semibold tracking-tight text-white flex items-center gap-2"
-        >
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          Mustafa Dağ
-        </a>
-
-        <div className="flex items-center gap-6">
-          <a
-            href="#projects"
-            className="text-xs text-neutral-400 hover:text-white transition hidden sm:inline-block"
-          >
-            {lang === "tr" ? "Projeler" : "Projects"}
-          </a>
-          <a
-            href="#about"
-            className="text-xs text-neutral-400 hover:text-white transition hidden sm:inline-block"
-          >
-            {lang === "tr" ? "Hakkımda" : "About"}
-          </a>
-          <a
-            href="#contact"
-            className="text-xs text-neutral-400 hover:text-white transition hidden sm:inline-block"
-          >
-            {lang === "tr" ? "İletişim" : "Contact"}
-          </a>
-
+      {/* ÜST HUD TELEMETRİ BARI */}
+      <div className="relative z-50 border-b border-neutral-800/80 bg-neutral-950/80 backdrop-blur-md px-6 py-2 flex items-center justify-between text-[11px] font-mono text-neutral-400">
+        <div className="flex items-center gap-4">
+          <span className="flex items-center gap-1.5 text-emerald-400">
+            <Radio className="w-3.5 h-3.5 animate-pulse" /> SOC NODE: LIVE
+          </span>
+          <span className="hidden sm:inline-block">PING: 4ms</span>
+          <span className="hidden md:inline-block">
+            HOST: DAG-SEC-WORKSTATION
+          </span>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="text-neutral-400">
+            KERNEL HOOKS: <b className="text-white">ACTIVE</b>
+          </span>
           <button
-            onClick={toggleLanguage}
-            className="flex items-center gap-1.5 px-3 py-1 rounded-full border border-neutral-700/80 bg-neutral-900 text-xs font-mono text-neutral-300 hover:text-white transition cursor-pointer"
+            onClick={() => setLang((l) => (l === "tr" ? "en" : "tr"))}
+            className="flex items-center gap-1 text-white hover:text-emerald-400 transition cursor-pointer px-2 py-0.5 rounded border border-neutral-800 bg-neutral-900"
           >
-            <Languages className="w-3.5 h-3.5 text-emerald-400" />
-            <span className="font-semibold">{lang === "tr" ? "EN" : "TR"}</span>
+            <Languages className="w-3 h-3 text-emerald-400" />
+            <span>{lang === "tr" ? "EN" : "TR"}</span>
           </button>
         </div>
-      </nav>
+      </div>
 
-      <main className="relative z-10 max-w-5xl mx-auto px-6 pt-36 sm:pt-44 pb-32 space-y-36">
-        {/* HERO SECTION - MODERN & BOLD */}
-        <section className="space-y-10">
-          <div className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-neutral-800 bg-neutral-900/60 text-xs font-mono text-neutral-300 backdrop-blur-md">
-            <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            {t.badge}
+      <main className="relative z-10 max-w-6xl mx-auto px-6 pt-16 pb-32 space-y-28">
+        {/* HERO: ŞAŞAALI OPERASYON BAŞLIĞI */}
+        <section className="space-y-8 pt-6">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-950/30 text-xs font-mono text-emerald-400 backdrop-blur-xl shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+            <Lock className="w-3.5 h-3.5" />
+            <span>DEFENSIVE CYBERSECURITY & THREAT HUNTING</span>
           </div>
 
-          <div className="space-y-4">
-            <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold tracking-tight text-white leading-none">
-              {t.heroTitle}
+          <div className="space-y-3">
+            <h1 className="text-5xl sm:text-7xl lg:text-8xl font-black tracking-tight text-white uppercase drop-shadow-2xl">
+              Mustafa{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-sky-400">
+                Dağ
+              </span>
             </h1>
-            <p className="text-xl sm:text-2xl md:text-3xl text-neutral-400 font-light max-w-3xl leading-snug">
-              {t.heroRole}
+            <p className="text-lg sm:text-2xl font-mono text-neutral-300 tracking-wide">
+              {lang === "tr"
+                ? "Uç Nokta Tehdit Tespiti (EDR) & Sistem Savunma Mühendisi"
+                : "Endpoint Detection & Response (EDR) & Systems Security Engineer"}
             </p>
           </div>
 
-          <p className="text-neutral-400 text-base sm:text-lg max-w-2xl leading-relaxed font-light">
-            {t.heroDesc}
+          <p className="text-neutral-400 text-sm sm:text-base max-w-3xl leading-relaxed font-light">
+            {lang === "tr"
+              ? "Sysmon çekirdek telemetrisi, Windows Internals, PE Shannon entropi analizleri ve C# tabanlı yüksek performanslı siber güvenlik ajanları geliştiriyorum. Şüpheli süreçlerin davranışsal izini sürüp saldırıları anında otonom olarak bastıran savunma hatları inşa ediyorum."
+              : "Engineering low-latency C# security agents, tapping Windows Sysmon telemetry, computing Shannon entropy over PE headers, and deploying automated incident mitigation pipelines."}
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 pt-2">
-            <a
-              href="#contact"
-              className="flex items-center gap-2 px-7 py-3.5 rounded-full bg-white text-black font-semibold text-sm hover:bg-neutral-200 transition shadow-lg shadow-white/5"
+          <div className="flex flex-wrap items-center gap-4 pt-4">
+            <button
+              onClick={runSimulation}
+              className="flex items-center gap-2 px-6 py-3.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-black font-bold text-xs tracking-wider uppercase hover:opacity-95 transition shadow-[0_0_30px_rgba(16,185,129,0.35)] cursor-pointer"
             >
-              <span>{t.ctaContact}</span>
-              <ArrowUpRight className="w-4 h-4" />
-            </a>
+              <Play className="w-4 h-4 fill-black" />
+              <span>
+                {lang === "tr"
+                  ? "Tehdit Simülasyonu Başlat"
+                  : "Execute Threat Sim"}
+              </span>
+            </button>
 
             <a
-              href="#projects"
-              className="flex items-center gap-2 px-7 py-3.5 rounded-full border border-neutral-800 bg-neutral-950/60 text-neutral-300 hover:text-white hover:border-neutral-600 transition text-sm backdrop-blur-md"
+              href="mailto:m.dag0524@gmail.com"
+              className="flex items-center gap-2 px-6 py-3.5 rounded-xl border border-neutral-800 bg-neutral-900/80 hover:border-emerald-500/50 hover:bg-neutral-800 text-white transition text-xs font-mono backdrop-blur-md"
             >
-              <span>{t.ctaProjects}</span>
+              <Mail className="w-4 h-4 text-emerald-400" />
+              <span>m.dag0524@gmail.com</span>
             </a>
 
-            <div className="flex items-center gap-2 sm:ml-4 border-l border-neutral-800 pl-4">
+            <div className="flex items-center gap-2 border-l border-neutral-800 pl-4">
               <a
                 href="https://github.com/mustafaadag"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-full border border-neutral-800 bg-neutral-900/60 text-neutral-400 hover:text-white hover:border-neutral-600 transition"
-                title="GitHub"
+                className="p-3 rounded-xl border border-neutral-800 bg-neutral-900/60 text-neutral-400 hover:text-emerald-400 hover:border-emerald-500/40 transition"
               >
                 <GithubIcon />
               </a>
@@ -223,128 +327,138 @@ export default function Home() {
                 href="https://www.linkedin.com/in/mustafa-da%C4%9F-63609524a/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="p-3 rounded-full border border-neutral-800 bg-neutral-900/60 text-neutral-400 hover:text-white hover:border-neutral-600 transition"
-                title="LinkedIn"
+                className="p-3 rounded-xl border border-neutral-800 bg-neutral-900/60 text-neutral-400 hover:text-sky-400 hover:border-sky-500/40 transition"
               >
                 <LinkedinIcon />
               </a>
             </div>
           </div>
+        </section>
 
-          {/* İstatistik Göstergesi */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-12 border-t border-neutral-800/80">
-            {t.stats.map((stat, idx) => (
-              <div key={idx} className="space-y-1">
-                <div className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                  {stat.value}
-                </div>
-                <div className="text-xs font-mono text-neutral-500 uppercase tracking-wider">
-                  {stat.label}
-                </div>
+        {/* CANLI SOC TEHDİT MÜDAHALE TERMİNALİ */}
+        <section className="rounded-2xl border border-emerald-500/30 bg-neutral-950/90 backdrop-blur-2xl shadow-[0_0_50px_rgba(16,185,129,0.15)] overflow-hidden">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-neutral-800/90 bg-neutral-900/60">
+            <div className="flex items-center gap-2.5 font-mono text-xs text-neutral-300">
+              <TerminalIcon className="w-4 h-4 text-emerald-400" />
+              <span className="font-bold text-white">DAGSEC_SOC_CONSOLE</span>
+              <span className="text-neutral-500 hidden sm:inline-block">
+                | Telemetry Stream 24/7
+              </span>
+            </div>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/40">
+              AGENT: ONLINE
+            </span>
+          </div>
+
+          <div
+            ref={terminalRef}
+            className="p-6 font-mono text-xs space-y-2 h-56 overflow-y-auto"
+          >
+            {terminalLogs.map((log, i) => (
+              <div
+                key={i}
+                className={
+                  log.startsWith("[!]")
+                    ? "text-red-400 font-bold bg-red-950/30 p-1 rounded"
+                    : log.startsWith("[✓]")
+                      ? "text-emerald-300 font-bold bg-emerald-950/30 p-1 rounded"
+                      : log.startsWith("[*]")
+                        ? "text-sky-300"
+                        : log.startsWith(">")
+                          ? "text-white font-semibold"
+                          : "text-neutral-400"
+                }
+              >
+                {log}
               </div>
             ))}
           </div>
+
+          <form
+            onSubmit={handleCommand}
+            className="flex border-t border-neutral-800/80 bg-neutral-900/40"
+          >
+            <span className="pl-6 py-3 text-xs font-mono text-emerald-400 select-none">
+              &gt;
+            </span>
+            <input
+              type="text"
+              value={terminalInput}
+              onChange={(e) => setTerminalInput(e.target.value)}
+              placeholder="Komut girin ('scan', 'status', 'skills', 'clear')..."
+              className="w-full bg-transparent px-3 py-3 text-xs font-mono text-white focus:outline-hidden placeholder:text-neutral-600"
+            />
+          </form>
         </section>
 
-        {/* HAKKIMDA (ÖZET PROFİL) */}
-        <section
-          id="about"
-          className="p-8 sm:p-12 rounded-3xl border border-neutral-800/80 bg-neutral-900/30 backdrop-blur-xl relative overflow-hidden group"
-        >
-          <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none group-hover:bg-emerald-500/10 transition-all duration-700" />
-          <div className="relative z-10 space-y-4">
-            <span className="text-xs font-mono uppercase tracking-widest text-emerald-400">
-              {t.aboutSubtitle}
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-              {t.aboutTitle}
-            </h2>
-            <p className="text-neutral-300 text-base sm:text-lg leading-relaxed font-light pt-2 max-w-4xl">
-              {t.aboutText}
-            </p>
-          </div>
-        </section>
-
-        {/* BENTO GRID PROJE VİTRİNİ */}
-        <section id="projects" className="space-y-8">
-          <div className="space-y-2">
-            <span className="text-xs font-mono uppercase tracking-widest text-emerald-400">
-              {t.projectsSubtitle}
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-              {t.projectsTitle}
-            </h2>
+        {/* PROJELER: NEON BENTO GRID */}
+        <section className="space-y-8">
+          <div className="flex items-center justify-between border-b border-neutral-800 pb-4">
+            <div>
+              <span className="text-xs font-mono uppercase tracking-widest text-emerald-400">
+                ENGINEERING SHOWCASE
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-black text-white mt-1">
+                Öne Çıkan Sistemler & Projeler
+              </h2>
+            </div>
+            <Activity className="w-8 h-8 text-emerald-400 hidden sm:block" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* BENTO 1: HİBRİT EDR SİSTEMİ (GENİŞ KART) */}
-            <div className="md:col-span-2 p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-xl hover:border-neutral-700 transition duration-300 flex flex-col justify-between space-y-6 group">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono text-emerald-400 px-3 py-1 rounded-full border border-emerald-900/50 bg-emerald-950/40">
-                    Endpoint Security & Agent
-                  </span>
-                  <Shield className="w-6 h-6 text-neutral-500 group-hover:text-emerald-400 transition" />
-                </div>
+            {/* BENTO 1: EDR SİSTEMİ (DEVASA KART) */}
+            <div className="md:col-span-2 p-8 sm:p-10 rounded-3xl border border-neutral-800 bg-neutral-900/40 backdrop-blur-xl hover:border-emerald-500/50 hover:shadow-[0_0_40px_rgba(16,185,129,0.15)] transition-all duration-300 space-y-6 relative overflow-hidden group">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono text-emerald-400 px-3 py-1 rounded-full border border-emerald-800/60 bg-emerald-950/60">
+                  FLAGSHIP DEFENSE ENGINE
+                </span>
+                <Shield className="w-7 h-7 text-emerald-400 group-hover:scale-110 transition" />
+              </div>
+
+              <div className="space-y-2">
                 <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                  {lang === "tr"
-                    ? "Hibrit EDR & Sezgisel Tehdit Algılama Sistemi"
-                    : "Hybrid EDR & Heuristic Threat Detection"}
+                  Sysmon & Sezgisel Analiz Tabanlı Hibrit EDR Sistemi
                 </h3>
-                <p className="text-neutral-400 text-sm sm:text-base leading-relaxed">
-                  {lang === "tr"
-                    ? "Sysmon Event Log telemetrisini gerçek zamanlı dinleyen, PE dosyalarında Shannon Entropi formülüyle paketlenmiş/gizlenmiş kod arayan ve yerel SQLite önbellekli VirusTotal API doğrulaması yapan otonom C# uç nokta güvenlik ajanı."
-                    : "A C# endpoint security agent hooking Sysmon telemetry in real-time, executing Shannon entropy heuristics on PE sections to spot packed payloads, backed by local SQLite caching and VirusTotal API."}
+                <p className="text-neutral-300 text-sm sm:text-base leading-relaxed">
+                  Windows çekirdeğindeki şüpheli proses aktivitelerini Sysmon
+                  Event Log üzerinden gerçek zamanlı yakalayan; PE başlıklarında
+                  Shannon Entropi formülüyle paketlenmiş zararlıları tespit edip
+                  yerel SQLite önbellek ve VirusTotal API ile teyit eden otonom
+                  C# güvenlik ajanı.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-neutral-800/60 text-xs text-neutral-300">
-                <div className="flex items-center gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2 text-xs font-mono text-neutral-300">
+                <div className="p-3 rounded-xl bg-neutral-950/80 border border-neutral-800 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>
-                    {lang === "tr"
-                      ? "Sysmon Event ID 1, 3, 7 Telemetrisi"
-                      : "Sysmon Event ID 1, 3, 7 Telemetry"}
-                  </span>
+                  <span>Sysmon ID 1, 3, 7 Telemetrisi</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="p-3 rounded-xl bg-neutral-950/80 border border-neutral-800 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>
-                    {lang === "tr"
-                      ? "Shannon Entropi Sezgisel Analizi"
-                      : "Shannon Entropy Heuristic Engine"}
-                  </span>
+                  <span>Shannon Entropi Heuristiği</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="p-3 rounded-xl bg-neutral-950/80 border border-neutral-800 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>
-                    {lang === "tr"
-                      ? "SQLite Önbellekleme & VT API"
-                      : "SQLite Local Caching & VT API"}
-                  </span>
+                  <span>SQLite Önbellek & VT API</span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="p-3 rounded-xl bg-neutral-950/80 border border-neutral-800 flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>
-                    {lang === "tr"
-                      ? "Otonom Süreç Karantinası"
-                      : "Automated Process Remediation"}
-                  </span>
+                  <span>Otonom Süreç Karantinası</span>
                 </div>
               </div>
 
               <div className="flex flex-wrap gap-2 pt-2">
                 {[
                   "C#",
-                  ".NET",
-                  "Sysmon",
+                  ".NET Framework",
+                  "Sysmon Telemetry",
                   "Windows Internals",
+                  "Threat Hunting",
                   "SQLite",
-                  "VirusTotal API",
                 ].map((tag) => (
                   <span
                     key={tag}
-                    className="text-xs font-mono text-neutral-400 bg-neutral-950 px-3 py-1 rounded-md border border-neutral-800"
+                    className="text-xs font-mono text-emerald-300 bg-emerald-950/30 border border-emerald-800/40 px-3 py-1 rounded-md"
                   >
                     {tag}
                   </span>
@@ -352,110 +466,94 @@ export default function Home() {
               </div>
             </div>
 
-            {/* BENTO 2: TELEMETRİ BORU HATTI METRİĞİ */}
-            <div className="p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-xl hover:border-neutral-700 transition duration-300 flex flex-col justify-between space-y-6">
+            {/* BENTO 2: 4 ADIMLI PIPELINE AKIŞI */}
+            <div className="p-8 rounded-3xl border border-neutral-800 bg-neutral-900/40 backdrop-blur-xl hover:border-sky-500/50 hover:shadow-[0_0_30px_rgba(56,189,248,0.15)] transition space-y-6 flex flex-col justify-between">
               <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono text-sky-400 px-3 py-1 rounded-full border border-sky-900/50 bg-sky-950/40">
-                    Pipeline
-                  </span>
-                  <Activity className="w-6 h-6 text-neutral-500" />
-                </div>
-                <h3 className="text-xl font-bold text-white tracking-tight">
-                  {lang === "tr"
-                    ? "Telemetri Boru Hattı"
-                    : "Telemetry Pipeline"}
-                </h3>
-                <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed">
-                  {lang === "tr"
-                    ? "Ham işletim sistemi loglarından başlayıp SOC aksiyonuna uzanan 4 adımlı otonom filtreleme mimarisi."
-                    : "4-stage automated pipeline filtering kernel telemetry to targeted SOC responses."}
+                <span className="text-xs font-mono text-sky-400 px-3 py-1 rounded-full border border-sky-800/60 bg-sky-950/60">
+                  PIPELINE
+                </span>
+                <h3 className="text-xl font-bold text-white">EDR Veri Hattı</h3>
+                <p className="text-neutral-400 text-xs leading-relaxed">
+                  Çekirdek telemetrisinden SOC kararına uzanan 4 kademeli
+                  doğrulama hattı.
                 </p>
               </div>
 
-              <div className="space-y-3 text-xs font-mono">
-                <div className="p-2.5 rounded-xl bg-neutral-950/80 border border-neutral-800 text-neutral-300">
-                  01. Sysmon Ingestion
+              <div className="space-y-2 text-xs font-mono">
+                <div className="p-3 rounded-xl bg-neutral-950 border border-neutral-800 text-neutral-300">
+                  <b className="text-emerald-400">01.</b> Sysmon Kernel Hook
                 </div>
-                <div className="p-2.5 rounded-xl bg-neutral-950/80 border border-neutral-800 text-neutral-300">
-                  02. Heuristic Entropy Scan
+                <div className="p-3 rounded-xl bg-neutral-950 border border-neutral-800 text-neutral-300">
+                  <b className="text-sky-400">02.</b> PE Shannon Entropy
                 </div>
-                <div className="p-2.5 rounded-xl bg-neutral-950/80 border border-neutral-800 text-neutral-300">
-                  03. Cloud Threat Query
+                <div className="p-3 rounded-xl bg-neutral-950 border border-neutral-800 text-neutral-300">
+                  <b className="text-amber-400">03.</b> Hash Cache & VT Query
                 </div>
-                <div className="p-2.5 rounded-xl bg-neutral-950/80 border border-neutral-800 text-emerald-400">
-                  04. Quarantine / Terminate
+                <div className="p-3 rounded-xl bg-neutral-950 border border-neutral-800 text-red-400 font-semibold">
+                  <b className="text-red-400">04.</b> Remediation & SOC Alert
                 </div>
               </div>
             </div>
 
-            {/* BENTO 3: IOT ENERJİ İZLEME PANELİ */}
-            <div className="p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-xl hover:border-neutral-700 transition duration-300 flex flex-col justify-between space-y-6">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono text-amber-400 px-3 py-1 rounded-full border border-amber-900/50 bg-amber-950/40">
-                    IoT & Mobile
-                  </span>
-                  <Cpu className="w-6 h-6 text-neutral-500" />
-                </div>
-                <h3 className="text-xl font-bold text-white tracking-tight">
-                  {lang === "tr"
-                    ? "Canlı Enerji İzleme Paneli"
-                    : "Realtime Energy Dashboard"}
-                </h3>
-                <p className="text-neutral-400 text-xs sm:text-sm leading-relaxed">
-                  {lang === "tr"
-                    ? "ESP32 sensör telemetrisini Firebase Realtime DB üzerinden toplayıp Flutter mobil istemcisinde canlı görselleştiren sistem."
-                    : "Live telemetry ingestion from ESP32 microcontrollers streaming to Firebase Realtime DB and visualised via Flutter."}
-                </p>
+            {/* BENTO 3: IOT ENERJİ ANALİZ PANELİ */}
+            <div className="p-8 rounded-3xl border border-neutral-800 bg-neutral-900/40 backdrop-blur-xl hover:border-amber-500/50 hover:shadow-[0_0_30px_rgba(245,158,11,0.15)] transition space-y-5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono text-amber-400 px-3 py-1 rounded-full border border-amber-800/60 bg-amber-950/60">
+                  HARDWARE & IOT
+                </span>
+                <Cpu className="w-6 h-6 text-amber-400" />
               </div>
-
-              <div className="flex flex-wrap gap-2 pt-4 border-t border-neutral-800/60">
-                {["Flutter", "Dart", "ESP32", "Firebase"].map((tag) => (
+              <h3 className="text-xl font-bold text-white">
+                Flutter & ESP32 Canlı Enerji Paneli
+              </h3>
+              <p className="text-neutral-400 text-xs leading-relaxed">
+                ESP32 mikrodenetleyicileri üzerinden anlık akım ve voltaj
+                verilerini okuyarak Firebase Realtime Database ile canlı
+                senkronize eden ve Flutter arayüzünde anomalileri görselleştiren
+                sistem.
+              </p>
+              <div className="flex flex-wrap gap-2 pt-2">
+                {["Flutter", "Dart", "ESP32", "Firebase"].map((t) => (
                   <span
-                    key={tag}
-                    className="text-xs font-mono text-neutral-400 bg-neutral-950 px-2.5 py-1 rounded-md border border-neutral-800"
+                    key={t}
+                    className="text-[11px] font-mono text-neutral-300 bg-neutral-950 px-2.5 py-1 rounded border border-neutral-800"
                   >
-                    {tag}
+                    {t}
                   </span>
                 ))}
               </div>
             </div>
 
-            {/* BENTO 4: PYTHON KONUT FİYAT TAHMİN MODELİ (GENİŞ KART) */}
-            <div className="md:col-span-2 p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-xl hover:border-neutral-700 transition duration-300 flex flex-col justify-between space-y-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-mono text-purple-400 px-3 py-1 rounded-full border border-purple-900/50 bg-purple-950/40">
-                    Machine Learning
-                  </span>
-                  <LineChart className="w-6 h-6 text-neutral-500" />
-                </div>
-                <h3 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
-                  {lang === "tr"
-                    ? "Konut Kira Fiyatı Tahmin & Regresyon Modeli"
-                    : "Real Estate Rent Price Estimation Model"}
-                </h3>
-                <p className="text-neutral-400 text-sm sm:text-base leading-relaxed">
-                  {lang === "tr"
-                    ? "Açık kaynaklı konut veri setleri üzerinde aykırı değer filtreleme, özellik mühendisliği (feature scaling) ve istatistiksel regresyon modelleri uygulayarak piyasa manipülasyonlarını tespit eden analitik sistem."
-                    : "Heuristic regression pipeline executing outlier elimination, feature scaling, and correlation metrics on real estate datasets to detect market price anomalies."}
-                </p>
+            {/* BENTO 4: PYTHON KONUT REGRESYON MODELİ */}
+            <div className="md:col-span-2 p-8 rounded-3xl border border-neutral-800 bg-neutral-900/40 backdrop-blur-xl hover:border-purple-500/50 hover:shadow-[0_0_30px_rgba(168,85,247,0.15)] transition space-y-5">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-mono text-purple-400 px-3 py-1 rounded-full border border-purple-800/60 bg-purple-950/60">
+                  DATA SCIENCE & ML
+                </span>
+                <LineChart className="w-6 h-6 text-purple-400" />
               </div>
-
-              <div className="flex flex-wrap gap-2 pt-4 border-t border-neutral-800/60">
+              <h3 className="text-xl font-bold text-white">
+                Konut Fiyat Tahminleme ve Piyasa Manipülasyon Analizi
+              </h3>
+              <p className="text-neutral-300 text-xs sm:text-sm leading-relaxed">
+                Açık kaynak konut veri setlerinde aykırı değer temizleme
+                (outlier filtering), özellik mühendisliği (feature engineering)
+                ve çok değişkenli regresyon algoritmaları kullanarak kira
+                değerlerini tahminleyen analitik model.
+              </p>
+              <div className="flex flex-wrap gap-2 pt-2">
                 {[
                   "Python",
                   "Pandas",
                   "Scikit-Learn",
                   "Feature Engineering",
                   "Jupyter",
-                ].map((tag) => (
+                ].map((t) => (
                   <span
-                    key={tag}
-                    className="text-xs font-mono text-neutral-400 bg-neutral-950 px-3 py-1 rounded-md border border-neutral-800"
+                    key={t}
+                    className="text-[11px] font-mono text-neutral-300 bg-neutral-950 px-2.5 py-1 rounded border border-neutral-800"
                   >
-                    {tag}
+                    {t}
                   </span>
                 ))}
               </div>
@@ -463,170 +561,110 @@ export default function Home() {
           </div>
         </section>
 
-        {/* DENEYİM & EĞİTİM ZAMAN ÇİZELGESİ */}
-        <section className="space-y-8">
-          <div className="space-y-2">
-            <span className="text-xs font-mono uppercase tracking-widest text-emerald-400">
-              {t.experienceSubtitle}
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-              {t.experienceTitle}
-            </h2>
+        {/* DENEYİM, EĞİTİM & YETKİNLİKLER */}
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* DENEYİM */}
+          <div className="p-8 rounded-3xl border border-neutral-800 bg-neutral-950/70 backdrop-blur-xl space-y-6">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2 font-mono">
+              <Briefcase className="w-5 h-5 text-emerald-400" /> OPERASYONEL
+              DENEYİM
+            </h3>
+            <div className="space-y-6 border-l-2 border-neutral-800 pl-6">
+              <div className="space-y-1.5 relative">
+                <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-emerald-400 ring-4 ring-[#050508]" />
+                <span className="text-xs font-mono text-neutral-500">
+                  2025 - 2026
+                </span>
+                <h4 className="text-base font-bold text-white">
+                  Cybersecurity Intern
+                </h4>
+                <p className="text-xs font-mono text-emerald-400">Cybercyte</p>
+                <p className="text-xs text-neutral-400 leading-relaxed">
+                  Sysmon log telemetrisi, EDR mimari ajan prototiplemesi,
+                  tarayıcı eklenti analizleri ve otonom sızma testi
+                  araştırmaları.
+                </p>
+              </div>
+
+              <div className="space-y-1.5 relative">
+                <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-neutral-600 ring-4 ring-[#050508]" />
+                <span className="text-xs font-mono text-neutral-500">
+                  2022 - 2023
+                </span>
+                <h4 className="text-base font-bold text-white">
+                  Software Developer
+                </h4>
+                <p className="text-xs font-mono text-neutral-400">
+                  Maarif Metaverse
+                </p>
+                <p className="text-xs text-neutral-400 leading-relaxed">
+                  Unity oyun motoru ve C# mimarisiyle 3D etkileşimli sanal
+                  derslik simülasyonları geliştirilmesi.
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* KARİYER */}
-            <div className="p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-900/30 backdrop-blur-xl space-y-6">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <Briefcase className="w-5 h-5 text-emerald-400" />
-                {lang === "tr" ? "İş Deneyimi" : "Work Experience"}
-              </h3>
+          {/* EĞİTİM & DİL */}
+          <div className="p-8 rounded-3xl border border-neutral-800 bg-neutral-950/70 backdrop-blur-xl space-y-6">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2 font-mono">
+              <GraduationCap className="w-5 h-5 text-sky-400" /> AKADEMİK KİMLİK
+            </h3>
+            <div className="space-y-6 border-l-2 border-neutral-800 pl-6">
+              <div className="space-y-1.5 relative">
+                <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-sky-400 ring-4 ring-[#050508]" />
+                <span className="text-xs font-mono text-neutral-500">
+                  2021 - 2026
+                </span>
+                <h4 className="text-base font-bold text-white">
+                  Karabük Üniversitesi
+                </h4>
+                <p className="text-xs font-mono text-sky-400">
+                  Bilgisayar Mühendisliği Lisans
+                </p>
+                <p className="text-xs text-neutral-400">GPA: 2.82</p>
+              </div>
 
-              <div className="space-y-8 border-l border-neutral-800 pl-6">
-                <div className="relative space-y-2">
-                  <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-emerald-400 ring-4 ring-[#09090b]" />
-                  <span className="text-xs font-mono text-neutral-500">
-                    2025 - 2026
-                  </span>
-                  <h4 className="text-base font-semibold text-white">
-                    Cybersecurity Intern
-                  </h4>
-                  <p className="text-xs font-mono text-emerald-400">
-                    Cybercyte
-                  </p>
-                  <p className="text-xs text-neutral-400 leading-relaxed">
-                    {lang === "tr"
-                      ? "Sysmon log telemetrisi, EDR mimari ajan prototiplemesi, tarayıcı eklenti analizleri ve otonom sızma testi modelleri."
-                      : "Sysmon log telemetry, EDR agent prototyping, browser extension audits, and automated penetration testing models."}
-                  </p>
-                </div>
-
-                <div className="relative space-y-2">
-                  <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-neutral-600 ring-4 ring-[#09090b]" />
-                  <span className="text-xs font-mono text-neutral-500">
-                    2022 - 2023
-                  </span>
-                  <h4 className="text-base font-semibold text-white">
-                    Software Developer
-                  </h4>
-                  <p className="text-xs font-mono text-neutral-400">
-                    Maarif Metaverse (Startup)
-                  </p>
-                  <p className="text-xs text-neutral-400 leading-relaxed">
-                    {lang === "tr"
-                      ? "Unity ve C# altyapısıyla sanal etkileşimli eğitim simülasyonları geliştirilmesi."
-                      : "Building 3D interactive virtual learning spaces using Unity and C#."}
-                  </p>
-                </div>
+              <div className="space-y-1.5 relative">
+                <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-neutral-600 ring-4 ring-[#050508]" />
+                <span className="text-xs font-mono text-neutral-500">
+                  2016 - 2020
+                </span>
+                <h4 className="text-base font-bold text-white">
+                  KÜPKÖK 1112 Anadolu Lisesi
+                </h4>
+                <p className="text-xs text-neutral-400 font-mono">
+                  Lise Diploması
+                </p>
               </div>
             </div>
 
-            {/* EĞİTİM & DİL */}
-            <div className="p-8 sm:p-10 rounded-3xl border border-neutral-800/80 bg-neutral-900/30 backdrop-blur-xl space-y-6">
-              <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-                <GraduationCap className="w-5 h-5 text-sky-400" />
-                {lang === "tr" ? "Eğitim & Diller" : "Education & Languages"}
-              </h3>
-
-              <div className="space-y-8 border-l border-neutral-800 pl-6">
-                <div className="relative space-y-2">
-                  <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-sky-400 ring-4 ring-[#09090b]" />
-                  <span className="text-xs font-mono text-neutral-500">
-                    2021 - 2026
-                  </span>
-                  <h4 className="text-base font-semibold text-white">
-                    {lang === "tr"
-                      ? "Karabük Üniversitesi"
-                      : "Karabük University"}
-                  </h4>
-                  <p className="text-xs font-mono text-sky-400">
-                    {lang === "tr"
-                      ? "Bilgisayar Mühendisliği Lisans"
-                      : "B.Sc. in Computer Engineering"}
-                  </p>
-                  <p className="text-xs text-neutral-400">GPA: 2.82</p>
-                </div>
-
-                <div className="relative space-y-2">
-                  <div className="absolute -left-[31px] top-1.5 w-3 h-3 rounded-full bg-neutral-600 ring-4 ring-[#09090b]" />
-                  <span className="text-xs font-mono text-neutral-500">
-                    2016 - 2020
-                  </span>
-                  <h4 className="text-base font-semibold text-white">
-                    KÜPKÖK 1112 Anadolu Lisesi
-                  </h4>
-                  <p className="text-xs text-neutral-400 font-mono">
-                    {lang === "tr" ? "Lise Diploması" : "High School Diploma"}
-                  </p>
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-neutral-800/60 flex items-center justify-between text-xs">
-                <span className="text-neutral-400 font-medium">
-                  {lang === "tr" ? "İngilizce Seviyesi" : "English"}
-                </span>
-                <span className="font-mono text-emerald-400 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-900/40">
-                  A2 - B1 Technical
-                </span>
-              </div>
+            <div className="p-4 rounded-xl bg-neutral-900/60 border border-neutral-800 flex items-center justify-between text-xs font-mono">
+              <span className="text-neutral-300">Yabancı Dil: İngilizce</span>
+              <span className="text-emerald-400">A2 - B1 Technical</span>
             </div>
           </div>
         </section>
 
-        {/* TEKNOLOJİ & YETKİNLİKLER */}
-        <section className="space-y-8">
+        {/* İLETİŞİM */}
+        <section className="p-8 sm:p-12 rounded-3xl border border-emerald-500/30 bg-gradient-to-b from-neutral-900/80 to-neutral-950/90 backdrop-blur-2xl space-y-6 shadow-[0_0_50px_rgba(16,185,129,0.1)]">
           <div className="space-y-2">
             <span className="text-xs font-mono uppercase tracking-widest text-emerald-400">
-              {t.skillsSubtitle}
+              DISPATCH DIRECTIVE
             </span>
-            <h2 className="text-3xl sm:text-4xl font-bold tracking-tight text-white">
-              {t.skillsTitle}
+            <h2 className="text-3xl sm:text-5xl font-black text-white">
+              İletişim Hattı
             </h2>
-          </div>
-
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 text-xs font-mono">
-            {[
-              { name: "C# & .NET", level: "Advanced" },
-              { name: "Sysmon Telemetry", level: "Specialist" },
-              { name: "Windows Internals", level: "Intermediate" },
-              { name: "EDR Architecture", level: "Advanced" },
-              { name: "Python / ML", level: "Intermediate" },
-              { name: "Flutter & Dart", level: "Intermediate" },
-              { name: "SQLite & SQL", level: "Intermediate" },
-              { name: "Threat Hunting", level: "SOC Operations" },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="p-4 rounded-2xl bg-neutral-900/30 border border-neutral-800/80 space-y-1 hover:border-neutral-700 transition"
-              >
-                <div className="font-semibold text-white">{item.name}</div>
-                <div className="text-[11px] text-neutral-500">{item.level}</div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* İLETİŞİM (CONTACT) */}
-        <section
-          id="contact"
-          className="p-8 sm:p-12 rounded-3xl border border-neutral-800/80 bg-neutral-900/40 backdrop-blur-xl space-y-8"
-        >
-          <div className="space-y-3 max-w-2xl">
-            <span className="text-xs font-mono uppercase tracking-widest text-emerald-400">
-              {t.contactSubtitle}
-            </span>
-            <h2 className="text-3xl sm:text-5xl font-bold tracking-tight text-white">
-              {t.contactTitle}
-            </h2>
-            <p className="text-neutral-400 text-sm sm:text-base leading-relaxed">
-              {t.contactDesc}
+            <p className="text-neutral-400 text-sm max-w-xl font-light">
+              Siber savunma sistemleri, uç nokta güvenliği veya ortak
+              mühendislik projeleri için doğrudan temas kurun.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-4 pt-2">
             <a
               href="mailto:m.dag0524@gmail.com"
-              className="flex items-center gap-2 px-7 py-3.5 rounded-full bg-white text-black font-semibold text-sm hover:bg-neutral-200 transition"
+              className="flex items-center gap-2.5 px-7 py-3.5 rounded-xl bg-white text-black font-bold text-xs tracking-wider uppercase hover:bg-neutral-200 transition"
             >
               <Mail className="w-4 h-4" />
               <span>m.dag0524@gmail.com</span>
@@ -636,7 +674,7 @@ export default function Home() {
               href="https://www.linkedin.com/in/mustafa-da%C4%9F-63609524a/"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-7 py-3.5 rounded-full border border-neutral-800 bg-neutral-950 text-neutral-300 hover:text-white hover:border-neutral-600 transition text-sm"
+              className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-200 hover:text-sky-400 hover:border-sky-500/50 transition text-xs font-mono"
             >
               <LinkedinIcon />
               <span>LinkedIn</span>
@@ -646,7 +684,7 @@ export default function Home() {
               href="https://github.com/mustafaadag"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-2 px-7 py-3.5 rounded-full border border-neutral-800 bg-neutral-950 text-neutral-300 hover:text-white hover:border-neutral-600 transition text-sm"
+              className="flex items-center gap-2.5 px-6 py-3.5 rounded-xl border border-neutral-800 bg-neutral-900 text-neutral-200 hover:text-emerald-400 hover:border-emerald-500/50 transition text-xs font-mono"
             >
               <GithubIcon />
               <span>GitHub</span>
@@ -655,11 +693,12 @@ export default function Home() {
         </section>
 
         {/* FOOTER */}
-        <footer className="pt-12 border-t border-neutral-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-neutral-500">
-          <div>
-            © {new Date().getFullYear()} Mustafa Dağ. All rights reserved.
+        <footer className="pt-8 border-t border-neutral-900 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono text-neutral-500">
+          <div>© {new Date().getFullYear()} Mustafa Dağ — Bursa / Nilüfer</div>
+          <div className="text-emerald-400 flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" /> DagSec
+            Platform v3.8
           </div>
-          <div>Nilüfer, Bursa / Turkey</div>
         </footer>
       </main>
     </div>
